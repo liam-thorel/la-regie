@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
   {
@@ -27,6 +28,7 @@ export const routes: Routes = [
       },
       {
         path: 'videos',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/video-library/video-library-page').then((m) => m.VideoLibraryPage),
       },

@@ -42,6 +42,8 @@
       <a class="btn btn-secondary" routerLink="/rejoindre">Rejoindre un lobby</a>
     </div>
 
-    <a class="library-link" routerLink="/videos">Gérer la bibliothèque de vidéos</a>
+    @if (auth.isAdmin()) {
+      <a class="library-link" routerLink="/videos">Gérer la bibliothèque de vidéos</a>
+    }
   </main>
 </div>

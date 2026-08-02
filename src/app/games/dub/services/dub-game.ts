@@ -23,14 +23,32 @@ export interface VoteWithVoter extends Vote {
 export class DubGameService {
   private readonly supabase = inject(SupabaseService).client;
 
+  /**
+   * Associe une vidéo à chaque manche, dans l'ordre choisi par l'host.
+   * Appelé juste après la création du lobby : sans ça, les manches n'ont
+   * aucune vidéo à jouer.
+   */
+  async setupRounds(lobbyId: string, videoIds: string[]): Promise<{ error: string | null }> {
+    const rows = videoIds.map((video_id, index) => ({
+      lobby_id: lobbyId,
+      round_number: index + 1,
+      video_id,
+    }));
+
+    const { error } = await this.supabase.from('lobby_rounds').insert(rows);
+    return { error: error?.message ?? null };
+  }
+
   /** Vidéo à doubler pour une manche donnée. */
   async getRoundVideo(lobbyId: string, roundNumber: number): Promise<VideoAsset | null> {
+    // maybeSingle plutôt que single : renvoie null au lieu d'une erreur 406
+    // si la manche n'a pas de vidéo associée.
     const { data } = await this.supabase
       .from('lobby_rounds')
       .select('videos(*)')
       .eq('lobby_id', lobbyId)
       .eq('round_number', roundNumber)
-      .single();
+      .maybeSingle();
 
     return (data as { videos: VideoAsset } | null)?.videos ?? null;
   }

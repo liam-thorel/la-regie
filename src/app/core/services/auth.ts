@@ -12,13 +12,19 @@ export class AuthService {
   readonly currentProfile = signal<Profile | null>(null);
   /** Passe à true une fois que l'état de session initial a été vérifié. */
   readonly ready = signal(false);
+  /** Vrai si le compte connecté peut gérer la bibliothèque de vidéos.
+   *  L'autorité reste la base (table admins + RLS) : ce signal ne sert
+   *  qu'à masquer l'interface. */
+  readonly isAdmin = signal(false);
 
   constructor() {
     // Récupère la session existante (utilisateur déjà connecté précédemment).
     this.supabase.auth.getSession().then(({ data }) => {
       const userId = data.session?.user.id;
       if (userId) {
-        this.loadProfile(userId).finally(() => this.ready.set(true));
+        Promise.all([this.loadProfile(userId), this.refreshAdminFlag()]).finally(() =>
+          this.ready.set(true),
+        );
       } else {
         this.ready.set(true);
       }
@@ -29,8 +35,10 @@ export class AuthService {
     this.supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user.id) {
         this.loadProfile(session.user.id);
+        this.refreshAdminFlag();
       } else {
         this.currentProfile.set(null);
+        this.isAdmin.set(false);
       }
     });
   }
@@ -45,6 +53,11 @@ export class AuthService {
     if (!error && data) {
       this.currentProfile.set(data as Profile);
     }
+  }
+
+  private async refreshAdminFlag(): Promise<void> {
+    const { data } = await this.supabase.rpc('is_admin');
+    this.isAdmin.set(data === true);
   }
 
   /**
@@ -96,5 +109,6 @@ export class AuthService {
   async signOut(): Promise<void> {
     await this.supabase.auth.signOut();
     this.currentProfile.set(null);
+    this.isAdmin.set(false);
   }
 }

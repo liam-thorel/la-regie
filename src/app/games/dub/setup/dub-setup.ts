@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VideoLibraryService } from '../../../core/services/video-library';
 import { LobbyService } from '../../../core/services/lobby';
+import { DubGameService } from '../services/dub-game';
 import { VideoAsset, DubSettings } from '../../../core/models/types';
 
 @Component({
@@ -14,6 +15,7 @@ import { VideoAsset, DubSettings } from '../../../core/models/types';
 export class DubSetup implements OnInit {
   private readonly videoLibrary = inject(VideoLibraryService);
   private readonly lobbyService = inject(LobbyService);
+  private readonly dubGame = inject(DubGameService);
   private readonly router = inject(Router);
 
   readonly videos = signal<VideoAsset[]>([]);
@@ -72,6 +74,19 @@ export class DubSetup implements OnInit {
       this.error.set(error ?? 'Création du lobby impossible.');
       return;
     }
+
+    // Associe une vidéo à chaque manche : sans ces lignes, la partie
+    // démarre sans rien à doubler.
+    const { error: roundsError } = await this.dubGame.setupRounds(
+      lobby.id,
+      this.selectedVideoIds(),
+    );
+
+    if (roundsError) {
+      this.error.set('Les manches n\u2019ont pas pu être créées.');
+      return;
+    }
+
     this.router.navigate(['/lobby', lobby.id]);
   }
 }
