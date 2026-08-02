@@ -1,0 +1,61 @@
+<div class="center-screen">
+  <div class="card card-wide">
+    <h1>Bibliothèque de vidéos</h1>
+    <p>Les vidéos ajoutées ici sont proposées à la création d'un lobby.</p>
+
+    <div class="upload-box">
+      <label class="file-drop" for="videoFile">
+        {{ fileName() ?? 'Choisir une vidéo' }}
+      </label>
+      <input id="videoFile" type="file" accept="video/*" (change)="onFileSelected($event)" />
+
+      <label>
+        Titre
+        <input
+          type="text"
+          name="title"
+          maxlength="80"
+          [ngModel]="title()"
+          (ngModelChange)="title.set($event)"
+        />
+      </label>
+
+      @if (uploading()) {
+        <div class="progress">
+          <div class="progress-bar" [style.width.%]="progress()"></div>
+        </div>
+        <span class="progress-label">Envoi {{ progress() }} %</span>
+      }
+
+      <button class="btn-primary" (click)="upload()" [disabled]="uploading()">
+        {{ uploading() ? 'Envoi en cours...' : 'Ajouter à la bibliothèque' }}
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <h2>Vidéos disponibles ({{ videos().length }})</h2>
+
+    @if (loading()) {
+      <p>Chargement...</p>
+    } @else if (videos().length === 0) {
+      <p>La bibliothèque est vide. Ajoute une première vidéo ci-dessus.</p>
+    } @else {
+      <ul class="library-list">
+        @for (video of videos(); track video.id) {
+          <li class="library-row">
+            <span class="video-title">{{ video.title }}</span>
+            @if (video.duration_seconds) {
+              <span class="duration">{{ video.duration_seconds }}s</span>
+            }
+            <button class="link-btn" (click)="remove(video)">Supprimer</button>
+          </li>
+        }
+      </ul>
+    }
+
+    <a class="btn btn-secondary back-btn" routerLink="/">Retour à l'accueil</a>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+<div class="center-screen">
+  <form class="auth-card" (ngSubmit)="submit()">
+    <h1>Rejoindre un lobby</h1>
+    <p>Demande le code à l'host de la partie.</p>
+
+    <label>
+      Code du lobby
+      <input
+        type="text"
+        name="code"
+        required
+        maxlength="6"
+        class="code-input"
+        placeholder="F3K9QZ"
+        [ngModel]="code()"
+        (ngModelChange)="code.set($event)"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Connexion...' : 'Rejoindre' }}
+    </button>
+  </form>
+</div>

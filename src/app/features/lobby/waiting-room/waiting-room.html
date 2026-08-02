@@ -1,0 +1,55 @@
+<div class="center-screen">
+  @if (loading()) {
+    <p>Chargement du lobby...</p>
+  } @else if (error() && !lobby()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (lobby(); as l) {
+    <div class="card card-wide">
+      <div class="lobby-header">
+        @if (game(); as g) {
+          <span class="game-eyebrow">{{ g.name }}</span>
+        }
+        <button class="ticket-code" (click)="copyCode()" title="Copier le code">
+          {{ l.code }}
+        </button>
+        <p class="hint">
+          {{ codeCopied() ? 'Code copié' : 'Donne ce code à tes amis pour qu\'ils rejoignent.' }}
+        </p>
+      </div>
+
+      <h2>Joueurs ({{ players().length }})</h2>
+      <ul class="player-list">
+        @for (player of players(); track player.id) {
+          <li class="player-row">
+            @if (player.avatar_url) {
+              <img class="avatar" [src]="player.avatar_url" alt="" />
+            } @else {
+              <span class="avatar avatar-fallback">{{ player.pseudo.charAt(0) }}</span>
+            }
+            <span class="pseudo">{{ player.pseudo }}</span>
+            @if (player.profile_id === l.host_id) {
+              <span class="host-tag">Host</span>
+            }
+          </li>
+        }
+      </ul>
+
+      <p class="hint">{{ l.rounds_count }} manche(s)</p>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      @if (isHost) {
+        <button (click)="startGame()" [disabled]="starting() || !canStart">
+          {{ starting() ? 'Lancement...' : 'Lancer la partie' }}
+        </button>
+        @if (!canStart) {
+          <p class="hint">Il faut au moins {{ game()?.minPlayers }} joueurs pour lancer.</p>
+        }
+      } @else {
+        <p class="waiting-hint">En attente que l'host lance la partie...</p>
+      }
+    </div>
+  }
+</div>

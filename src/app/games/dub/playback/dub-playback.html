@@ -1,0 +1,52 @@
+<div class="game-layout">
+  <app-scoreboard [players]="players()" [myPlayerId]="myPlayer()?.id ?? null" />
+
+  <main class="stage-main">
+    @if (loading()) {
+      <p>Chargement de la diffusion...</p>
+    } @else if (error()) {
+      <p class="error">{{ error() }}</p>
+    } @else if (dubs().length === 0) {
+      <p>Personne n'a enregistré de doublage sur cette manche.</p>
+      @if (isHost) {
+        <button class="btn-primary" (click)="next()">Passer au vote</button>
+      }
+    } @else {
+      <header class="playback-header">
+        <span class="round-label">
+          Diffusion {{ index() + 1 }} / {{ dubs().length }}
+        </span>
+        @if (currentDub(); as dub) {
+          <span class="author">
+            @if (dub.players.avatar_url) {
+              <img class="avatar" [src]="dub.players.avatar_url" alt="" />
+            }
+            {{ dub.players.pseudo }}
+          </span>
+        }
+      </header>
+
+      <div class="player-frame">
+        <video #videoEl class="video" [src]="videoUrl()" muted playsinline></video>
+      </div>
+
+      <audio #audioEl [src]="audioUrl()" (ended)="onDubEnded()"></audio>
+
+      <div class="controls">
+        <button class="btn-primary" (click)="playCurrent()" [disabled]="playing()">
+          {{ playing() ? 'Lecture en cours...' : 'Lancer la lecture' }}
+        </button>
+
+        @if (isHost) {
+          <button class="btn-secondary" (click)="next()">
+            {{ isLast() ? 'Passer au vote' : 'Doublage suivant' }}
+          </button>
+        }
+      </div>
+
+      @if (!isHost) {
+        <p class="hint">L'host fait avancer la diffusion.</p>
+      }
+    }
+  </main>
+</div>

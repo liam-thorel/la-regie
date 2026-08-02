@@ -1,0 +1,78 @@
+<div class="game-layout">
+  <app-scoreboard
+    [players]="players()"
+    [readyPlayerIds]="lockedPlayerIds()"
+    [myPlayerId]="myPlayer()?.id ?? null"
+  />
+
+  <main class="stage-main">
+    @if (loading()) {
+      <p>Chargement de la manche...</p>
+    } @else if (error() && !video()) {
+      <p class="error">{{ error() }}</p>
+    } @else {
+      <header class="round-header">
+        <span class="round-label">
+          Manche {{ roundNumber() }} / {{ lobby()?.rounds_count }}
+        </span>
+        @if (recorder.isRecording()) {
+          <span class="rec-dot">REC</span>
+        }
+      </header>
+
+      <div class="player-frame">
+        <video
+          #videoEl
+          class="video"
+          [src]="videoUrl()"
+          playsinline
+          (ended)="onVideoEnded()"
+        ></video>
+      </div>
+
+      <div class="controls">
+        @if (hasValidated()) {
+          <p class="locked-note">Prise validée. En attente des autres joueurs.</p>
+        } @else if (recorder.isRecording()) {
+          <button class="btn-primary" (click)="stopTake()">Arrêter la prise</button>
+        } @else {
+          <button class="btn-primary" (click)="startTake()" [disabled]="saving()">
+            {{ myDub() ? 'Refaire une prise' : 'Enregistrer ma prise' }}
+          </button>
+          <button class="btn-secondary" (click)="toggleMute()">
+            {{ muted() ? 'Remettre le son' : 'Couper le son' }}
+          </button>
+        }
+      </div>
+
+      @if (lastTakeUrl(); as takeUrl) {
+        <div class="take-review">
+          <span>Ta dernière prise</span>
+          <audio [src]="takeUrl" controls></audio>
+        </div>
+      }
+
+      @if (myDub() && !hasValidated()) {
+        <button class="btn-validate" (click)="validateTake()" [disabled]="saving()">
+          Valider ma prise
+        </button>
+      }
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <footer class="round-footer">
+        <span class="ready-count">
+          {{ lockedPlayerIds().length }} / {{ players().length }} joueurs ont validé
+        </span>
+
+        @if (isHost) {
+          <button class="btn-secondary" (click)="endRecording()">
+            {{ allValidated() ? 'Lancer la diffusion' : "Terminer l'enregistrement" }}
+          </button>
+        }
+      </footer>
+    }
+  </main>
+</div>

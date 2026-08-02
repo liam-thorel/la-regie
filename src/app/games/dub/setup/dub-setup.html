@@ -1,0 +1,45 @@
+<div class="center-screen">
+  <form class="card card-wide" (ngSubmit)="submit()">
+    <h1>Doublage Party</h1>
+    <p>Chaque vidéo choisie devient une manche, dans l'ordre où tu la sélectionnes.</p>
+
+    <div class="video-picker">
+      <div class="video-picker-header">
+        <span>Bibliothèque de vidéos</span>
+        <span class="rounds-count">{{ selectedVideoIds().length }} manche(s)</span>
+      </div>
+
+      @if (loadingVideos()) {
+        <p>Chargement...</p>
+      } @else if (videos().length === 0) {
+        <p>
+          Aucune vidéo dans la bibliothèque pour l'instant. Ajoute-en depuis la page
+          d'administration des vidéos.
+        </p>
+      } @else {
+        <ul class="video-list">
+          @for (video of videos(); track video.id) {
+            <li
+              class="video-item"
+              [class.selected]="isSelected(video.id)"
+              (click)="toggleVideo(video.id)"
+            >
+              @if (isSelected(video.id)) {
+                <span class="round-badge">{{ roundNumber(video.id) }}</span>
+              }
+              <span class="video-title">{{ video.title }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Création...' : 'Créer le lobby' }}
+    </button>
+  </form>
+</div>

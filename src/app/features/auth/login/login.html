@@ -1,0 +1,39 @@
+<div class="auth-screen">
+  <form class="auth-card" (ngSubmit)="submit()">
+    <h1>Connexion</h1>
+
+    <label>
+      Email
+      <input
+        type="email"
+        name="email"
+        required
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+      />
+    </label>
+
+    <label>
+      Mot de passe
+      <input
+        type="password"
+        name="password"
+        required
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Connexion...' : 'Se connecter' }}
+    </button>
+
+    <p class="switch">
+      Pas encore de compte ? <a routerLink="/signup">Créer un compte</a>
+    </p>
+  </form>
+</div>

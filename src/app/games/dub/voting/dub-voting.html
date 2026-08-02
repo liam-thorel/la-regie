@@ -1,0 +1,136 @@
+<div class="game-layout">
+  <app-scoreboard
+    [players]="players()"
+    [readyPlayerIds]="finishedVoterIds()"
+    [myPlayerId]="myPlayer()?.id ?? null"
+  />
+
+  <main class="stage-main">
+    @if (loading()) {
+      <p>Chargement des votes...</p>
+    } @else if (error() && dubs().length === 0) {
+      <p class="error">{{ error() }}</p>
+    } @else {
+      <header class="vote-header">
+        <span class="round-label">Manche {{ roundNumber() }} · Vote</span>
+        <span class="super-like-status" [class.used]="superLikeUsed()">
+          Super like {{ superLikeUsed() ? 'utilisé' : 'disponible' }}
+        </span>
+      </header>
+
+      @if (votableDubs().length === 0) {
+        <p>Aucun doublage à noter sur cette manche.</p>
+      }
+
+      <ul class="dub-table">
+        @for (dub of votableDubs(); track dub.id) {
+          <li class="dub-row" [class.voted]="myVoteFor(dub.id) !== null">
+            <div class="dub-main">
+              <div class="dub-author">
+                @if (dub.players.avatar_url) {
+                  <img class="avatar" [src]="dub.players.avatar_url" alt="" />
+                } @else {
+                  <span class="avatar avatar-fallback">{{ dub.players.pseudo.charAt(0) }}</span>
+                }
+                <span class="pseudo">{{ dub.players.pseudo }}</span>
+              </div>
+
+              <button class="btn-secondary replay-btn" (click)="toggleReplay(dub.id)">
+                {{ replayingDubId() === dub.id ? 'Fermer' : 'Revoir' }}
+              </button>
+
+              <div class="vote-buttons">
+                <button
+                  class="vote-btn dislike"
+                  [class.active]="myVoteFor(dub.id) === -1"
+                  (click)="vote(dub, -1)"
+                  title="-1 point"
+                >
+                  −1
+                </button>
+                <button
+                  class="vote-btn neutral"
+                  [class.active]="myVoteFor(dub.id) === 0"
+                  (click)="vote(dub, 0)"
+                  title="0 point"
+                >
+                  0
+                </button>
+                <button
+                  class="vote-btn like"
+                  [class.active]="myVoteFor(dub.id) === 1"
+                  (click)="vote(dub, 1)"
+                  title="+1 point"
+                >
+                  +1
+                </button>
+                <button
+                  class="vote-btn super"
+                  [class.active]="myVoteFor(dub.id) === 2"
+                  [disabled]="superLikeUsed() && myVoteFor(dub.id) !== 2"
+                  (click)="vote(dub, 2)"
+                  title="Super like : +2 points, une fois par manche"
+                >
+                  ★
+                </button>
+              </div>
+
+              <span class="dub-total">{{ totalFor(dub.id) }}</span>
+            </div>
+
+            @if (replayingDubId() === dub.id) {
+              <div class="replay-frame">
+                <video
+                  class="video"
+                  [src]="videoUrl()"
+                  muted
+                  playsinline
+                  autoplay
+                  loop
+                ></video>
+                <audio [src]="audioUrl(dub)" controls autoplay></audio>
+              </div>
+            }
+
+            @if (votesFor(dub.id).length > 0) {
+              <ul class="vote-chips">
+                @for (v of votesFor(dub.id); track v.id) {
+                  <li class="vote-chip" [attr.data-value]="v.value">
+                    {{ v.players.pseudo }}
+                    {{ v.value === 2 ? '★' : v.value > 0 ? '+1' : v.value < 0 ? '−1' : '0' }}
+                  </li>
+                }
+              </ul>
+            }
+          </li>
+        }
+      </ul>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <footer class="vote-footer">
+        <span class="ready-count">
+          {{ finishedVoterIds().length }} / {{ players().length }} joueurs ont fini de voter
+        </span>
+
+        @if (isHost) {
+          <button class="btn-primary end-round-btn" (click)="endRound()">
+            {{
+              everyoneVoted()
+                ? isLastRound()
+                  ? 'Voir le podium'
+                  : 'Manche suivante'
+                : isLastRound()
+                  ? 'Terminer la partie'
+                  : 'Forcer la manche suivante'
+            }}
+          </button>
+        } @else if (iHaveFinished()) {
+          <span class="waiting">En attente des autres joueurs...</span>
+        }
+      </footer>
+    }
+  </main>
+</div>

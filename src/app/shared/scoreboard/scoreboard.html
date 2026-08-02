@@ -1,0 +1,19 @@
+<aside class="scoreboard">
+  <h2>Scores</h2>
+  <ul>
+    @for (player of ranked; track player.id) {
+      <li class="score-row" [class.me]="player.id === myPlayerId()">
+        @if (player.avatar_url) {
+          <img class="avatar" [src]="player.avatar_url" alt="" />
+        } @else {
+          <span class="avatar avatar-fallback">{{ player.pseudo.charAt(0) }}</span>
+        }
+        <span class="pseudo">{{ player.pseudo }}</span>
+        @if (isReady(player.id)) {
+          <span class="ready-dot" title="A validé sa prise"></span>
+        }
+        <span class="score">{{ player.score }}</span>
+      </li>
+    }
+  </ul>
+</aside>

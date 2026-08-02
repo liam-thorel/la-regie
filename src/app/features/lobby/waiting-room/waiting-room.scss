@@ -1,0 +1,91 @@
+.lobby-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .ticket-code {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+
+.player-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.pseudo {
+  flex: 1;
+}
+
+.host-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.waiting-hint {
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.game-eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+button.ticket-code {
+  width: auto;
+  cursor: pointer;
+  font-weight: 600;
+
+  &:hover {
+    border-color: var(--gold);
+  }
+}

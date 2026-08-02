@@ -1,0 +1,239 @@
+.podium-screen {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+.podium-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.round-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+h1 {
+  font-size: clamp(2.2rem, 7vw, 3.4rem);
+  margin-top: 8px;
+}
+
+/* ---------- Podium ---------- */
+
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.step {
+  flex: 1;
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar.small {
+  width: 28px;
+  height: 28px;
+}
+
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.step .pseudo {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.step .points {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.block {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-bottom: none;
+}
+
+.place {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--text-muted);
+}
+
+.step[data-place='1'] {
+  .block {
+    height: 130px;
+    background: linear-gradient(180deg, var(--gold) 0%, #c98f26 100%);
+    border-color: var(--gold);
+  }
+  .place {
+    color: var(--gold-ink);
+    font-size: 2.4rem;
+  }
+  .avatar {
+    width: 68px;
+    height: 68px;
+    border: 2px solid var(--gold);
+  }
+}
+
+.step[data-place='2'] .block {
+  height: 96px;
+}
+
+.step[data-place='3'] .block {
+  height: 70px;
+}
+
+/* ---------- Classement ---------- */
+
+h2 {
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.ranking {
+  margin-bottom: 40px;
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+.ranking-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  .pseudo {
+    flex: 1;
+  }
+
+  .points {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--gold);
+  }
+}
+
+.rank {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 2ch;
+}
+
+/* ---------- Trophées ---------- */
+
+.trophies ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.trophy {
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &[data-trophy='hater'] {
+    border-color: var(--danger);
+  }
+
+  &[data-trophy='liker'] {
+    border-color: var(--pink);
+  }
+
+  &[data-trophy='goat'] {
+    border-color: var(--cyan);
+  }
+}
+
+.trophy-label {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trophy-winner {
+  font-weight: 700;
+
+  &.empty {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+}
+
+.trophy-count {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.trophy-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.back-btn {
+  margin: 40px auto 0;
+  max-width: 260px;
+}

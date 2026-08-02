@@ -1,0 +1,69 @@
+<div class="podium-screen">
+  @if (loading()) {
+    <p>Dépouillement...</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else {
+    <header class="podium-header">
+      <span class="round-label">Fin de partie</span>
+      <h1>Résultats</h1>
+    </header>
+
+    <section class="podium">
+      @for (step of podium(); track step.place) {
+        <div class="step" [attr.data-place]="step.place">
+          <div class="step-player">
+            @if (step.player!.avatar_url) {
+              <img class="avatar" [src]="step.player!.avatar_url" alt="" />
+            } @else {
+              <span class="avatar avatar-fallback">{{ step.player!.pseudo.charAt(0) }}</span>
+            }
+            <span class="pseudo">{{ step.player!.pseudo }}</span>
+            <span class="points">{{ step.player!.score }} pts</span>
+          </div>
+          <div class="block">
+            <span class="place">{{ step.place }}</span>
+          </div>
+        </div>
+      }
+    </section>
+
+    <section class="ranking">
+      <h2>Classement</h2>
+      <ol>
+        @for (row of ranking(); track row.player_id; let i = $index) {
+          <li class="ranking-row">
+            <span class="rank">{{ i + 1 }}</span>
+            @if (row.avatar_url) {
+              <img class="avatar small" [src]="row.avatar_url" alt="" />
+            } @else {
+              <span class="avatar small avatar-fallback">{{ row.pseudo.charAt(0) }}</span>
+            }
+            <span class="pseudo">{{ row.pseudo }}</span>
+            <span class="points">{{ row.score }}</span>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <section class="trophies">
+      <h2>Trophées</h2>
+      <ul>
+        @for (trophy of trophies(); track trophy.key) {
+          <li class="trophy" [attr.data-trophy]="trophy.key">
+            <span class="trophy-label">{{ trophy.label }}</span>
+            @if (trophy.winner) {
+              <span class="trophy-winner">{{ trophy.winner.pseudo }}</span>
+              <span class="trophy-count">×{{ trophy.count }}</span>
+            } @else {
+              <span class="trophy-winner empty">Personne</span>
+            }
+            <span class="trophy-desc">{{ trophy.description }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <a class="btn btn-secondary back-btn" routerLink="/">Retour à l'accueil</a>
+  }
+</div>

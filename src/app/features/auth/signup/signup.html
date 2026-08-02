@@ -1,0 +1,62 @@
+<div class="auth-screen">
+  <form class="auth-card" (ngSubmit)="submit()">
+    <h1>Créer un compte</h1>
+    <p>Ton pseudo et ta photo servent dans toutes les parties.</p>
+
+    <div class="avatar-picker">
+      <label class="avatar-drop" for="avatar">
+        @if (avatarPreview()) {
+          <img [src]="avatarPreview()" alt="" />
+        } @else {
+          <span>Photo</span>
+        }
+      </label>
+      <input id="avatar" type="file" accept="image/*" (change)="onAvatarSelected($event)" />
+    </div>
+
+    <label>
+      Pseudo
+      <input
+        type="text"
+        name="pseudo"
+        required
+        maxlength="24"
+        [ngModel]="pseudo()"
+        (ngModelChange)="pseudo.set($event)"
+      />
+    </label>
+
+    <label>
+      Email
+      <input
+        type="email"
+        name="email"
+        required
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+      />
+    </label>
+
+    <label>
+      Mot de passe
+      <input
+        type="password"
+        name="password"
+        required
+        minlength="6"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Création...' : 'Créer mon compte' }}
+    </button>
+
+    <p class="switch">Déjà un compte ? <a routerLink="/login">Se connecter</a></p>
+  </form>
+</div>

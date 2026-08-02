@@ -1,0 +1,361 @@
+/* ===========================================================
+   Doublage Party — design tokens
+   Ambiance "régie de studio" : fond quasi noir violine, accent
+   doré façon enseigne lumineuse ("ON AIR"), rose électrique
+   pour le vote, cyan pour le super like.
+   =========================================================== */
+
+:root {
+  --bg: #0e0b16;
+  --stage-vignette: radial-gradient(ellipse 120% 80% at 50% -10%, #241c38 0%, #0e0b16 60%);
+  --surface: #1b1526;
+  --surface-2: #241c38;
+  --border: #382c50;
+  --text: #f4f0fa;
+  --text-muted: #9c8fbe;
+
+  --gold: #f2b33d;
+  --gold-ink: #241701;
+  --pink: #ff4f8b;
+  --cyan: #33e6c8;
+  --danger: #ff5661;
+
+  --font-display: 'Anton', sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow-card: 0 20px 60px -25px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg) var(--stage-vignette);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 0.4em;
+}
+
+p {
+  margin: 0 0 1em;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--gold);
+}
+
+/* Respect des préférences de mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ---------- Structure d'écran ---------- */
+
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-screen,
+.center-screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ---------- Carte / panneau de régie ---------- */
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 32px;
+}
+
+.auth-card {
+  @extend .card;
+}
+
+.card-wide {
+  @extend .card;
+  max-width: 560px;
+}
+
+/* ---------- Champs ---------- */
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+select {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--gold);
+}
+
+input[type='file'] {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Boutons ---------- */
+
+button,
+.btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px 20px;
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    filter 0.15s ease;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button[type='submit'],
+.btn-primary {
+  width: 100%;
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+
+button[type='submit']:not(:disabled):hover,
+.btn-primary:not(:disabled):hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--gold);
+}
+
+a.btn {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  padding: 0;
+  width: auto;
+}
+
+.link-btn:hover {
+  color: var(--text);
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: -8px 0 16px;
+}
+
+.switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Code de lobby façon ticket ---------- */
+
+.ticket-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+}
+
+/* ---------- Repère "waveform" (motif signature) ---------- */
+
+.waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 28px;
+}
+
+.waveform span {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--gold);
+  animation: waveform-pulse 1.1s ease-in-out infinite;
+}
+
+.waveform span:nth-child(1) {
+  height: 40%;
+  animation-delay: -1s;
+}
+.waveform span:nth-child(2) {
+  height: 70%;
+  animation-delay: -0.8s;
+}
+.waveform span:nth-child(3) {
+  height: 100%;
+  animation-delay: -0.6s;
+}
+.waveform span:nth-child(4) {
+  height: 55%;
+  animation-delay: -0.4s;
+}
+.waveform span:nth-child(5) {
+  height: 85%;
+  animation-delay: -0.2s;
+}
+.waveform span:nth-child(6) {
+  height: 45%;
+  animation-delay: 0s;
+}
+
+@keyframes waveform-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- Pastille REC ---------- */
+
+.rec-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--danger);
+}
+
+.rec-dot::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: rec-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes rec-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ---------- Gabarit d'écran de jeu : scores à gauche, scène au centre ---------- */
+
+.game-layout {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 28px;
+  padding: 28px;
+  max-width: 1240px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.stage-main {
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    gap: 18px;
+  }
+}

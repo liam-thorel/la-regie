@@ -1,0 +1,36 @@
+.avatar-picker {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  input {
+    display: none;
+  }
+}
+
+.avatar-drop {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  &:hover {
+    border-color: var(--gold);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
