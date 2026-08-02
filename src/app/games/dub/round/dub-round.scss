@@ -95,3 +95,18 @@
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+
+.take-review.active {
+  border-color: var(--gold);
+}
+
+.review-hint {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+/* Le lecteur natif garde une hauteur propre dans le cadre 16/9 */
+.video[controls] {
+  background: #000;
+}

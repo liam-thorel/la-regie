@@ -46,10 +46,13 @@ export class DubPlayback implements OnInit, OnDestroy {
   readonly dubs = signal<DubWithPlayer[]>([]);
   readonly index = signal(0);
   readonly playing = signal(false);
+  /** Vrai si le navigateur a refusé de démarrer tout seul. */
+  readonly needsManualStart = signal(false);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
   private channels: RealtimeChannel[] = [];
+  private commandChannel: RealtimeChannel | null = null;
   private lobbyId = '';
 
   readonly roundNumber = computed(() => this.lobby()?.current_round ?? 1);
@@ -95,7 +98,13 @@ export class DubPlayback implements OnInit, OnDestroy {
       this.loading.set(false);
     }
 
+    // L'host commande la lecture : tout le monde démarre en même temps.
+    this.commandChannel = this.dubGame.playbackChannel(this.lobbyId, () => {
+      void this.playCurrent();
+    });
+
     this.channels.push(
+      this.commandChannel,
       this.lobbyService.subscribeToPlayers(this.lobbyId, async () => {
         this.players.set(await this.lobbyService.listPlayers(this.lobbyId));
       }),
@@ -106,7 +115,8 @@ export class DubPlayback implements OnInit, OnDestroy {
         }
         if (phase === 'playback' && playbackIndex !== this.index()) {
           this.index.set(playbackIndex);
-          void this.playCurrent();
+          this.playing.set(false);
+          this.needsManualStart.set(false);
         }
       }),
     );
@@ -126,22 +136,37 @@ export class DubPlayback implements OnInit, OnDestroy {
     return dub ? this.dubGame.audioUrl(dub.audio_storage_path) : '';
   }
 
-  /** Joue la vidéo (muette) et le doublage ensemble, depuis le début. */
+  /**
+   * Joue la vidéo et le doublage ensemble, depuis le début.
+   * La vidéo est forcée en muet : on n'entend jamais le son original,
+   * seulement le doublage du joueur.
+   */
   async playCurrent(): Promise<void> {
     const video = this.videoRef()?.nativeElement;
     const audio = this.audioRef()?.nativeElement;
     if (!video || !audio) return;
 
+    video.muted = true;
     video.currentTime = 0;
     audio.currentTime = 0;
     this.playing.set(true);
+    this.needsManualStart.set(false);
 
     try {
       await Promise.all([video.play(), audio.play()]);
     } catch {
-      // Lecture bloquée par le navigateur : le joueur relance à la main.
+      // Certains navigateurs refusent de démarrer le son sans un clic
+      // préalable sur la page : on propose alors un bouton.
       this.playing.set(false);
+      this.needsManualStart.set(true);
     }
+  }
+
+  /** Host : lance la lecture chez tous les joueurs en même temps. */
+  async playForEveryone(): Promise<void> {
+    if (!this.isHost || !this.commandChannel) return;
+    await this.dubGame.broadcastPlay(this.commandChannel);
+    await this.playCurrent();
   }
 
   onDubEnded(): void {
@@ -157,6 +182,8 @@ export class DubPlayback implements OnInit, OnDestroy {
       await this.dubGame.openVoting(this.lobbyId);
       return;
     }
+    this.playing.set(false);
+    this.needsManualStart.set(false);
     await this.dubGame.setPlaybackIndex(this.lobbyId, this.index() + 1);
   }
 }

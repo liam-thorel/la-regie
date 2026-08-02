@@ -108,7 +108,9 @@ export class DubGameService {
     profileId: string,
     audio: Blob,
   ): Promise<{ error: string | null }> {
-    const path = `${lobbyId}/${roundNumber}/${profileId}.webm`;
+    // L'identifiant du joueur doit être un DOSSIER, pas le nom du fichier :
+    // les règles de stockage Supabase ne lisent que les segments de dossier.
+    const path = `${lobbyId}/${roundNumber}/${profileId}/prise.webm`;
 
     const { error: uploadError } = await this.supabase.storage
       .from('dubs')
@@ -239,6 +241,23 @@ export class DubGameService {
   /** URL d'écoute d'une prise enregistrée. */
   audioUrl(storagePath: string): string {
     return this.supabase.storage.from('dubs').getPublicUrl(storagePath).data.publicUrl;
+  }
+
+  /**
+   * Canal de commande de la diffusion. L'host envoie "play", tous les
+   * navigateurs démarrent au même moment. On passe par un message diffusé
+   * plutôt que par la base : c'est immédiat, et rien n'a besoin d'être
+   * conservé une fois la lecture lancée.
+   */
+  playbackChannel(lobbyId: string, onPlay: () => void): RealtimeChannel {
+    return this.supabase
+      .channel(`playback-cmd:${lobbyId}`)
+      .on('broadcast', { event: 'play' }, () => onPlay())
+      .subscribe();
+  }
+
+  async broadcastPlay(channel: RealtimeChannel): Promise<void> {
+    await channel.send({ type: 'broadcast', event: 'play', payload: {} });
   }
 
   subscribeToDubs(lobbyId: string, onChange: () => void): RealtimeChannel {

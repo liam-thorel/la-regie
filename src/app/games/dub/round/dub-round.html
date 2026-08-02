@@ -25,6 +25,9 @@
           #videoEl
           class="video"
           [src]="videoUrl()"
+          [controls]="!recorder.isRecording()"
+          controlsList="nodownload noplaybackrate"
+          disablePictureInPicture
           playsinline
           (ended)="onVideoEnded()"
         ></video>
@@ -46,10 +49,20 @@
       </div>
 
       @if (lastTakeUrl(); as takeUrl) {
-        <div class="take-review">
+        <div class="take-review" [class.active]="reviewing()">
           <span>Ta dernière prise</span>
-          <audio [src]="takeUrl" controls></audio>
+          <audio
+            #reviewAudioEl
+            [src]="takeUrl"
+            controls
+            (play)="onReviewPlay()"
+            (pause)="onReviewPause()"
+            (seeked)="onReviewSeek()"
+            (timeupdate)="onReviewTimeUpdate()"
+            (ended)="onReviewEnded()"
+          ></audio>
         </div>
+        <p class="review-hint">La vidéo se lance en même temps que ta prise.</p>
       }
 
       @if (myDub() && !hasValidated()) {

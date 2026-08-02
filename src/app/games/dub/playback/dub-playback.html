@@ -33,20 +33,24 @@
       <audio #audioEl [src]="audioUrl()" (ended)="onDubEnded()"></audio>
 
       <div class="controls">
-        <button class="btn-primary" (click)="playCurrent()" [disabled]="playing()">
-          {{ playing() ? 'Lecture en cours...' : 'Lancer la lecture' }}
-        </button>
-
         @if (isHost) {
+          <button class="btn-primary" (click)="playForEveryone()" [disabled]="playing()">
+            {{ playing() ? 'Lecture en cours...' : 'Lancer pour tout le monde' }}
+          </button>
+
           <button class="btn-secondary" (click)="next()">
             {{ isLast() ? 'Passer au vote' : 'Doublage suivant' }}
           </button>
+        } @else if (needsManualStart()) {
+          <button class="btn-primary" (click)="playCurrent()">
+            Ton navigateur a bloqué la lecture, clique pour lancer
+          </button>
+        } @else {
+          <p class="hint waiting-play">
+            {{ playing() ? 'Lecture en cours...' : "En attente que l'host lance la lecture..." }}
+          </p>
         }
       </div>
-
-      @if (!isHost) {
-        <p class="hint">L'host fait avancer la diffusion.</p>
-      }
     }
   </main>
 </div>

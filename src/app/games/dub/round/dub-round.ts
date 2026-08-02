@@ -34,6 +34,7 @@ export class DubRound implements OnInit, OnDestroy {
   readonly auth = inject(AuthService);
 
   private readonly videoRef = viewChild<ElementRef<HTMLVideoElement>>('videoEl');
+  private readonly reviewAudioRef = viewChild<ElementRef<HTMLAudioElement>>('reviewAudioEl');
 
   readonly lobby = signal<Lobby | null>(null);
   readonly players = signal<Player[]>([]);
@@ -46,6 +47,8 @@ export class DubRound implements OnInit, OnDestroy {
   /** Prise en cours de relecture avant validation. */
   readonly lastTakeUrl = signal<string | null>(null);
   readonly muted = signal(false);
+  /** Vrai pendant la relecture de sa prise : la vidéo suit l'audio. */
+  readonly reviewing = signal(false);
 
   private channels: RealtimeChannel[] = [];
   private lobbyId = '';
@@ -145,6 +148,58 @@ export class DubRound implements OnInit, OnDestroy {
     this.muted.set(el.muted);
   }
 
+  /* ---------- Relecture de sa prise, vidéo synchronisée ---------- */
+
+  /** L'audio de la prise pilote la vidéo : play, pause et déplacements. */
+  async onReviewPlay(): Promise<void> {
+    const video = this.videoRef()?.nativeElement;
+    const audio = this.reviewAudioRef()?.nativeElement;
+    if (!video || !audio) return;
+
+    this.reviewing.set(true);
+    // Pendant la relecture, on n'entend que le doublage.
+    video.muted = true;
+    video.currentTime = audio.currentTime;
+
+    try {
+      await video.play();
+    } catch {
+      // Lecture vidéo refusée par le navigateur : l'audio continue seul.
+    }
+  }
+
+  onReviewPause(): void {
+    this.videoRef()?.nativeElement.pause();
+  }
+
+  /** L'utilisateur a déplacé le curseur de l'audio : la vidéo suit. */
+  onReviewSeek(): void {
+    const video = this.videoRef()?.nativeElement;
+    const audio = this.reviewAudioRef()?.nativeElement;
+    if (video && audio) video.currentTime = audio.currentTime;
+  }
+
+  /** Corrige la dérive éventuelle entre l'audio et la vidéo. */
+  onReviewTimeUpdate(): void {
+    const video = this.videoRef()?.nativeElement;
+    const audio = this.reviewAudioRef()?.nativeElement;
+    if (!video || !audio || video.paused) return;
+
+    if (Math.abs(video.currentTime - audio.currentTime) > 0.25) {
+      video.currentTime = audio.currentTime;
+    }
+  }
+
+  onReviewEnded(): void {
+    this.reviewing.set(false);
+    const video = this.videoRef()?.nativeElement;
+    if (video) {
+      video.pause();
+      // On rend le son original pour la prise suivante, sauf si coupé exprès.
+      video.muted = this.muted();
+    }
+  }
+
   /**
    * Lance une prise : la vidéo repart du début et le micro tourne jusqu'à
    * la fin de la vidéo, pour que le doublage reste calé sur l'image.
@@ -155,6 +210,9 @@ export class DubRound implements OnInit, OnDestroy {
 
     this.error.set(null);
     this.lastTakeUrl.set(null);
+    this.reviewing.set(false);
+    this.reviewAudioRef()?.nativeElement.pause();
+    el.muted = this.muted();
 
     const { error } = await this.recorder.start();
     if (error) {

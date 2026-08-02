@@ -59,3 +59,11 @@
   text-align: center;
   font-size: 0.85rem;
 }
+
+.waiting-play {
+  flex: 1;
+  margin: 0;
+  padding: 13px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
