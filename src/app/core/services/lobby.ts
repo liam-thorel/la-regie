@@ -133,6 +133,15 @@ export class LobbyService {
     return { error: error?.message ?? null };
   }
 
+  /**
+   * Supprime définitivement une partie (réservé à l'host).
+   * Joueurs, manches, prises et votes partent en cascade.
+   */
+  async deleteLobby(lobbyId: string): Promise<{ error: string | null }> {
+    const { error } = await this.supabase.rpc('delete_lobby', { target_lobby: lobbyId });
+    return { error: error?.message ?? null };
+  }
+
   /** Suit les arrivées de joueurs et les changements de score. */
   subscribeToPlayers(lobbyId: string, onChange: () => void): RealtimeChannel {
     return this.supabase

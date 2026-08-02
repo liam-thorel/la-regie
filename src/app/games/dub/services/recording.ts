@@ -21,8 +21,24 @@ export class RecordingService {
   private async getStream(): Promise<MediaStream> {
     if (this.stream) return this.stream;
 
+    // Les trois traitements sont désactivés volontairement.
+    //
+    // echoCancellation est fait pour la visio : il écoute les haut-parleurs
+    // et baisse le micro quand il y retrouve le même son. Comme la vidéo
+    // joue pendant l'enregistrement, la voix du joueur se fait couper dès
+    // que la bande-son parle, puis revient dans les silences.
+    //
+    // noiseSuppression prend une voix qui module (chuchotements, cris,
+    // imitations) pour du bruit de fond et la hache.
+    //
+    // autoGainControl fait respirer le volume en permanence.
     this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true },
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        channelCount: 1,
+      },
     });
     return this.stream;
   }
@@ -40,7 +56,12 @@ export class RecordingService {
       const mimeType = this.pickMimeType();
 
       this.chunks = [];
-      this.recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      // 128 kbit/s : le débit par défaut de certains navigateurs descend
+      // très bas et donne un rendu terne.
+      this.recorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 128000,
+      });
       this.recorder.ondataavailable = (event) => {
         if (event.data.size > 0) this.chunks.push(event.data);
       };

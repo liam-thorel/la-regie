@@ -233,7 +233,31 @@ h2 {
   margin-top: 4px;
 }
 
-.back-btn {
-  margin: 40px auto 0;
-  max-width: 260px;
+.podium-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+
+  .btn,
+  button {
+    width: auto;
+  }
+}
+
+.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+
+  &:hover:not(:disabled) {
+    background: var(--danger);
+    color: #2b0508;
+  }
+}
+
+.close-hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.78rem;
 }

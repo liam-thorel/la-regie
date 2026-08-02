@@ -115,8 +115,42 @@ export class VideoLibraryService {
     });
   }
 
-  async deleteVideo(videoId: string): Promise<{ error: string | null }> {
-    const { error } = await this.supabase.from('videos').delete().eq('id', videoId);
-    return { error: error ? 'Suppression impossible.' : null };
+  /**
+   * Supprime une vidéo : la fiche en base et le fichier sur R2.
+   * Le `select()` est important : sans lui, une suppression refusée par les
+   * règles de sécurité renverrait un succès silencieux avec zéro ligne
+   * supprimée, et l'écran ne réagirait pas.
+   */
+  async deleteVideo(video: VideoAsset): Promise<{ error: string | null }> {
+    const { data, error } = await this.supabase
+      .from('videos')
+      .delete()
+      .eq('id', video.id)
+      .select();
+
+    if (error) {
+      return { error: `Suppression impossible : ${error.message}` };
+    }
+
+    if (!data || data.length === 0) {
+      return {
+        error:
+          "Suppression refusée. Vérifie que ton compte figure bien dans la table des administrateurs.",
+      };
+    }
+
+    // Le fichier R2 est retiré ensuite : si ça échoue, la fiche est déjà
+    // supprimée, on le signale sans bloquer.
+    const { error: storageError } = await this.supabase.functions.invoke('r2-delete-object', {
+      body: { storageKey: video.storage_key },
+    });
+
+    if (storageError) {
+      return {
+        error: 'Vidéo retirée de la liste, mais le fichier est toujours sur R2.',
+      };
+    }
+
+    return { error: null };
   }
 }

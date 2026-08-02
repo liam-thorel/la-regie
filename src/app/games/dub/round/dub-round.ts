@@ -141,11 +141,15 @@ export class DubRound implements OnInit, OnDestroy {
     return video ? this.videoLibrary.publicUrl(video.storage_key) : '';
   }
 
+  /**
+   * Coupe ou remet le son de la vidéo. Utilisable en pleine prise :
+   * le choix est mémorisé et réappliqué au démarrage des prises suivantes.
+   */
   toggleMute(): void {
     const el = this.videoRef()?.nativeElement;
-    if (!el) return;
-    el.muted = !el.muted;
-    this.muted.set(el.muted);
+    const next = !this.muted();
+    this.muted.set(next);
+    if (el) el.muted = next;
   }
 
   /* ---------- Relecture de sa prise, vidéo synchronisée ---------- */

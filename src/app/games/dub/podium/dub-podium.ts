@@ -1,7 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase';
 import { LobbyService } from '../../../core/services/lobby';
+import { AuthService } from '../../../core/services/auth';
+import { DubGameService } from '../services/dub-game';
 import { Lobby } from '../../../core/models/types';
 
 /** Une ligne de la vue lobby_trophies : score et compteurs de votes. */
@@ -33,11 +35,20 @@ export class DubPodium implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly supabase = inject(SupabaseService).client;
   private readonly lobbyService = inject(LobbyService);
+  private readonly dubGame = inject(DubGameService);
+  private readonly router = inject(Router);
+  readonly auth = inject(AuthService);
 
   readonly lobby = signal<Lobby | null>(null);
   readonly rows = signal<TrophyRow[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly closing = signal(false);
+
+  get isHost(): boolean {
+    const profile = this.auth.currentProfile();
+    return !!profile && profile.id === this.lobby()?.host_id;
+  }
 
   /** Classement complet, du meilleur au moins bon. */
   readonly ranking = computed(() => [...this.rows()].sort((a, b) => b.score - a.score));
@@ -104,5 +115,26 @@ export class DubPodium implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  /**
+   * Réservé à l'host : supprime définitivement la partie une fois que tout
+   * le monde a vu les résultats. Les fichiers audio partent d'abord, car
+   * la suppression du lobby fait perdre le droit d'y toucher.
+   */
+  async closeGame(): Promise<void> {
+    const lobby = this.lobby();
+    if (!this.isHost || !lobby) return;
+
+    this.closing.set(true);
+    await this.dubGame.deleteLobbyAudio(lobby.id);
+    const { error } = await this.lobbyService.deleteLobby(lobby.id);
+    this.closing.set(false);
+
+    if (error) {
+      this.error.set('La partie n\u2019a pas pu être supprimée.');
+      return;
+    }
+    this.router.navigateByUrl('/');
   }
 }

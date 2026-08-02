@@ -64,6 +64,20 @@
       </ul>
     </section>
 
-    <a class="btn btn-secondary back-btn" routerLink="/">Retour à l'accueil</a>
+    <div class="podium-actions">
+      <a class="btn btn-secondary" routerLink="/">Retour à l'accueil</a>
+
+      @if (isHost) {
+        <button class="btn-secondary danger" (click)="closeGame()" [disabled]="closing()">
+          {{ closing() ? 'Suppression...' : 'Fermer et supprimer la partie' }}
+        </button>
+      }
+    </div>
+
+    @if (isHost) {
+      <p class="close-hint">
+        Assure-toi que tout le monde a vu les résultats : la suppression est définitive.
+      </p>
+    }
   }
 </div>

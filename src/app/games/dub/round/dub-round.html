@@ -36,17 +36,28 @@
       <div class="controls">
         @if (hasValidated()) {
           <p class="locked-note">Prise validée. En attente des autres joueurs.</p>
-        } @else if (recorder.isRecording()) {
-          <button class="btn-primary" (click)="stopTake()">Arrêter la prise</button>
         } @else {
-          <button class="btn-primary" (click)="startTake()" [disabled]="saving()">
-            {{ myDub() ? 'Refaire une prise' : 'Enregistrer ma prise' }}
-          </button>
+          @if (recorder.isRecording()) {
+            <button class="btn-primary" (click)="stopTake()">Arrêter la prise</button>
+          } @else {
+            <button class="btn-primary" (click)="startTake()" [disabled]="saving()">
+              {{ myDub() ? 'Refaire une prise' : 'Enregistrer ma prise' }}
+            </button>
+          }
+
+          <!-- Disponible aussi en pleine prise : on peut couper la bande-son
+               en cours de route sans perdre l'enregistrement. -->
           <button class="btn-secondary" (click)="toggleMute()">
             {{ muted() ? 'Remettre le son' : 'Couper le son' }}
           </button>
         }
       </div>
+
+      @if (!hasValidated() && !recorder.isRecording()) {
+        <p class="mic-hint">
+          Au casque de préférence : sans ça, le son de la vidéo passe dans ton micro.
+        </p>
+      }
 
       @if (lastTakeUrl(); as takeUrl) {
         <div class="take-review" [class.active]="reviewing()">

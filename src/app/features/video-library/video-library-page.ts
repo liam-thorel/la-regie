@@ -82,7 +82,7 @@ export class VideoLibraryPage implements OnInit {
   }
 
   async remove(video: VideoAsset): Promise<void> {
-    const { error } = await this.library.deleteVideo(video.id);
+    const { error } = await this.library.deleteVideo(video);
     if (error) {
       this.error.set(error);
       return;

@@ -238,6 +238,39 @@ export class DubGameService {
     return (data ?? []) as DubWithPlayer[];
   }
 
+  /**
+   * Retire les fichiers audio d'une partie du stockage.
+   * Les cascades SQL ne touchent pas au stockage : sans ce nettoyage, les
+   * doublages resteraient dans le bucket après la suppression du lobby.
+   */
+  async deleteLobbyAudio(lobbyId: string): Promise<void> {
+    const paths: string[] = [];
+
+    // Les fichiers sont rangés en <lobby>/<manche>/<joueur>/prise.webm :
+    // on descend l'arborescence pour lister ce qu'il y a à supprimer.
+    const { data: rounds } = await this.supabase.storage.from('dubs').list(lobbyId);
+
+    for (const round of rounds ?? []) {
+      const { data: players } = await this.supabase.storage
+        .from('dubs')
+        .list(`${lobbyId}/${round.name}`);
+
+      for (const player of players ?? []) {
+        const { data: files } = await this.supabase.storage
+          .from('dubs')
+          .list(`${lobbyId}/${round.name}/${player.name}`);
+
+        for (const file of files ?? []) {
+          paths.push(`${lobbyId}/${round.name}/${player.name}/${file.name}`);
+        }
+      }
+    }
+
+    if (paths.length > 0) {
+      await this.supabase.storage.from('dubs').remove(paths);
+    }
+  }
+
   /** URL d'écoute d'une prise enregistrée. */
   audioUrl(storagePath: string): string {
     return this.supabase.storage.from('dubs').getPublicUrl(storagePath).data.publicUrl;
