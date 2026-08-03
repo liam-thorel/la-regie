@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { WheelLogo } from '../../../shared/wheel-logo/wheel-logo';
 import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-signup',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, WheelLogo],
   templateUrl: './signup.html',
   styleUrl: './signup.scss',
 })

@@ -40,22 +40,28 @@
   }
 }
 
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+  }
+}
+
 .locked-note {
   flex: 1;
   margin: 0;
-  padding: 13px;
+  padding: 11px;
   text-align: center;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .take-review {
-  margin-top: 18px;
-  padding: 14px 16px;
+  margin-top: 16px;
+  padding: 12px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -70,9 +76,10 @@
 
 .btn-validate {
   width: 100%;
-  margin-top: 14px;
-  background: var(--cyan);
-  color: #06231d;
+  margin-top: 12px;
+  background: var(--c-green);
+  color: #04170c;
+  font-weight: 600;
 }
 
 .round-footer {
@@ -97,7 +104,7 @@
 }
 
 .take-review.active {
-  border-color: var(--gold);
+  border-color: var(--accent);
 }
 
 .review-hint {

@@ -1,0 +1,40 @@
+<svg
+  class="wheel"
+  [class.still]="still()"
+  [style.--wheel-speed.s]="speed()"
+  [attr.width]="size()"
+  [attr.height]="size()"
+  viewBox="0 0 100 100"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Olygames"
+>
+  <!-- Mât et socle -->
+  <path d="M50 52 L34 88 M50 52 L66 88" stroke="var(--border-strong)" stroke-width="4" stroke-linecap="round" />
+  <path d="M28 88 H72" stroke="var(--border-strong)" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Ensemble tournant : jante, rayons et nacelles -->
+  <g class="spin">
+    <circle cx="50" cy="46" r="34" stroke="var(--border)" stroke-width="3" />
+    <g stroke-width="2.5" stroke-linecap="round">
+      <path d="M50 46 L50 12" stroke="var(--c-red)" />
+      <path d="M50 46 L79 29" stroke="var(--c-gold)" />
+      <path d="M50 46 L79 63" stroke="var(--c-teal)" />
+      <path d="M50 46 L50 80" stroke="var(--c-green)" />
+      <path d="M50 46 L21 63" stroke="var(--c-blurple)" />
+      <path d="M50 46 L21 29" stroke="var(--c-pink)" />
+    </g>
+
+    <!-- Les nacelles : rondes, donc toujours d'aplomb quel que soit l'angle -->
+    <circle cx="50" cy="12" r="5.5" fill="var(--c-red)" />
+    <circle cx="79" cy="29" r="5.5" fill="var(--c-gold)" />
+    <circle cx="79" cy="63" r="5.5" fill="var(--c-teal)" />
+    <circle cx="50" cy="80" r="5.5" fill="var(--c-green)" />
+    <circle cx="21" cy="63" r="5.5" fill="var(--c-blurple)" />
+    <circle cx="21" cy="29" r="5.5" fill="var(--c-pink)" />
+  </g>
+
+  <!-- Moyeu -->
+  <circle cx="50" cy="46" r="6" fill="var(--surface)" stroke="var(--text-muted)" stroke-width="2.5" />
+</svg>

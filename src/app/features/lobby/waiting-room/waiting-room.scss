@@ -1,17 +1,36 @@
+
 .lobby-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
 
-  .ticket-code {
-    display: flex;
-    justify-content: center;
+.game-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+button.ticket-code {
+  width: auto;
+  cursor: pointer;
+  transition: border-color 0.13s var(--ease);
+
+  &:hover {
+    border-color: var(--border-strong);
   }
 }
 
 .hint {
   text-align: center;
   font-size: 0.8rem;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .player-list {
@@ -20,16 +39,30 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .player-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  background: var(--surface-2);
+  padding: 9px 10px;
   border-radius: var(--radius-sm);
+  animation: player-in 0.16s var(--ease);
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+@keyframes player-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .avatar {
@@ -44,25 +77,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--border);
+  background: var(--surface-2);
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-weight: 600;
+  font-size: 0.8rem;
   text-transform: uppercase;
 }
 
 .pseudo {
   flex: 1;
+  font-weight: 500;
+  font-size: 0.92rem;
 }
 
 .host-tag {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.62rem;
+  font-weight: 500;
   letter-spacing: 0.1em;
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  border-radius: 999px;
-  padding: 2px 8px;
+  text-transform: uppercase;
+  color: var(--c-gold);
+  border: 1px solid color-mix(in srgb, var(--c-gold) 40%, transparent);
+  border-radius: 4px;
+  padding: 2px 7px;
 }
 
 .waiting-hint {
@@ -70,22 +107,8 @@
   font-size: 0.85rem;
 }
 
-.game-eyebrow {
+.copy-link-btn {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-
-button.ticket-code {
-  width: auto;
-  cursor: pointer;
-  font-weight: 600;
-
-  &:hover {
-    border-color: var(--gold);
-  }
+  margin: 10px auto 0;
+  font-size: 0.8rem;
 }

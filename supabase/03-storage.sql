@@ -35,7 +35,9 @@ create policy "chacun remplace son avatar"
   );
 
 -- ---------- Doublages audio ----------
--- Chemin attendu : <lobby_id>/<round>/<user_id>.webm
+-- Chemin attendu : <lobby_id>/<round>/<user_id>/prise.webm
+-- L'identifiant du joueur est un dossier : storage.foldername() ne lit que
+-- les segments de dossier, jamais le nom du fichier.
 create policy "doublages écoutables par les connectés"
   on storage.objects for select
   to authenticated
@@ -44,6 +46,19 @@ create policy "doublages écoutables par les connectés"
 create policy "chacun dépose son propre doublage"
   on storage.objects for insert
   to authenticated
+  with check (
+    bucket_id = 'dubs'
+    and (storage.foldername(name))[3] = auth.uid()::text
+  );
+
+-- Refaire une prise écrase le fichier précédent.
+create policy "chacun remplace sa propre prise"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'dubs'
+    and (storage.foldername(name))[3] = auth.uid()::text
+  )
   with check (
     bucket_id = 'dubs'
     and (storage.foldername(name))[3] = auth.uid()::text

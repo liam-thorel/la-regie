@@ -17,15 +17,17 @@
 
 .super-like-status {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.66rem;
+  font-weight: 500;
   letter-spacing: 0.1em;
-  color: var(--cyan);
-  border: 1px solid var(--cyan);
-  border-radius: 999px;
-  padding: 4px 12px;
+  text-transform: uppercase;
+  color: var(--super);
+  border: 1px solid color-mix(in srgb, var(--super) 40%, transparent);
+  border-radius: 4px;
+  padding: 3px 9px;
 
   &.used {
-    color: var(--text-muted);
+    color: var(--text-faint);
     border-color: var(--border);
   }
 }
@@ -44,9 +46,11 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 16px;
+  transition: border-color 0.13s var(--ease);
 
   &.voted {
-    border-color: var(--surface-2);
+    border-color: var(--border);
+    opacity: 0.92;
   }
 }
 
@@ -91,53 +95,60 @@
 
 .vote-buttons {
   display: flex;
-  gap: 6px;
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
 }
 
 .vote-btn {
-  width: 44px;
-  padding: 9px 0;
-  background: var(--surface-2);
-  color: var(--text);
-  border: 1px solid var(--border);
+  width: 42px;
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 6px;
   font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.82rem;
 
   &:hover:not(:disabled) {
-    border-color: currentColor;
+    background: var(--surface-2);
+    color: var(--text);
   }
 
   &.dislike.active {
-    background: var(--danger);
-    color: #2b0508;
-    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 18%, transparent);
+    color: var(--danger);
   }
 
   &.neutral.active {
-    background: var(--text-muted);
-    color: var(--bg);
+    background: var(--surface-2);
+    color: var(--text);
   }
 
   &.like.active {
-    background: var(--pink);
-    color: #340716;
-    border-color: var(--pink);
+    background: color-mix(in srgb, var(--like) 18%, transparent);
+    color: var(--like);
   }
 
   &.super {
-    color: var(--cyan);
+    color: color-mix(in srgb, var(--super) 70%, var(--text-muted));
   }
 
   &.super.active {
-    background: var(--cyan);
-    color: #06231d;
-    border-color: var(--cyan);
+    background: color-mix(in srgb, var(--super) 18%, transparent);
+    color: var(--super);
   }
 }
 
 .dub-total {
   font-family: var(--font-mono);
   font-weight: 600;
-  color: var(--gold);
+  font-size: 0.9rem;
+  color: var(--text);
   min-width: 3ch;
   text-align: right;
 }
@@ -172,19 +183,19 @@
 }
 
 .vote-chip {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-family: var(--font-mono);
-  padding: 3px 9px;
-  border-radius: 999px;
+  padding: 2px 8px;
+  border-radius: 4px;
   background: var(--surface-2);
   color: var(--text-muted);
 
   &[data-value='1'] {
-    color: var(--pink);
+    color: var(--like);
   }
 
   &[data-value='2'] {
-    color: var(--cyan);
+    color: var(--super);
   }
 
   &[data-value='-1'] {

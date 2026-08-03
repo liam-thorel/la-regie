@@ -1,1 +1,24 @@
-<router-outlet></router-outlet>
+@if (misconfigured) {
+  <div class="config-warning">
+    <div class="config-warning-card">
+      <span class="field-label">Configuration incomplète</span>
+      <h1>Connecte d'abord ton projet Supabase</h1>
+      <p>
+        Les valeurs d'exemple sont toujours dans <code>src/environments/environment.ts</code>.
+        Remplace <code>supabaseUrl</code> et <code>supabaseAnonKey</code> par celles de ton
+        projet, visibles dans Supabase sous <strong>Settings → API</strong>, puis relance
+        <code>npm start</code>.
+      </p>
+      <p class="config-warning-note">
+        Si le site est déployé, vérifie aussi
+        <code>src/environments/environment.production.ts</code> : les deux fichiers sont
+        indépendants.
+      </p>
+    </div>
+  </div>
+} @else {
+  @if (navigating()) {
+    <app-loading-overlay label="Chargement..." />
+  }
+  <router-outlet></router-outlet>
+}

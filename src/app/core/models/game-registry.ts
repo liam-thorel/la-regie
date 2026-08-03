@@ -24,6 +24,9 @@ export interface GameDefinition {
   playRoute: (lobbyId: string) => string;
   /** false = jeu affiché sur l'accueil mais pas encore jouable. */
   available: boolean;
+  /** Trophées possibles pour ce jeu (clé -> libellé), affichés sur la page
+   *  de profil. Absent pour un jeu qui n'a pas de trophées. */
+  trophies?: Record<string, string>;
 }
 
 export const GAMES: GameDefinition[] = [
@@ -35,6 +38,11 @@ export const GAMES: GameDefinition[] = [
     setupRoute: '/jeu/doublage/creer',
     playRoute: (lobbyId) => `/jeu/doublage/${lobbyId}/manche`,
     available: true,
+    trophies: {
+      hater: 'Le Hater',
+      liker: 'Le Liker',
+      goat: 'Le GOAT',
+    },
   },
 ];
 

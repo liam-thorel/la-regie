@@ -1,5 +1,10 @@
 <div class="auth-screen">
   <form class="auth-card" (ngSubmit)="submit()">
+    <div class="auth-brand">
+      <app-wheel-logo [size]="30" />
+      <span class="brand-name">Olygames</span>
+    </div>
+
     <h1>Connexion</h1>
 
     <label>
@@ -35,5 +40,6 @@
     <p class="switch">
       Pas encore de compte ? <a routerLink="/signup">Créer un compte</a>
     </p>
+    <p class="switch"><a routerLink="/mot-de-passe-oublie">Mot de passe oublié ?</a></p>
   </form>
 </div>

@@ -11,6 +11,16 @@ export const routes: Routes = [
     path: 'signup',
     loadComponent: () => import('./features/auth/signup/signup').then((m) => m.Signup),
   },
+  {
+    path: 'mot-de-passe-oublie',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
+    path: 'nouveau-mot-de-passe',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
 
   // ---- Noyau, commun à tous les jeux ----
   {
@@ -25,6 +35,16 @@ export const routes: Routes = [
         path: 'rejoindre',
         loadComponent: () =>
           import('./features/lobby/join-lobby/join-lobby').then((m) => m.JoinLobby),
+      },
+      {
+        path: 'rejoindre/:code',
+        loadComponent: () =>
+          import('./features/lobby/join-lobby/join-lobby').then((m) => m.JoinLobby),
+      },
+      {
+        path: 'profil',
+        loadComponent: () =>
+          import('./features/profile/profile-page').then((m) => m.ProfilePage),
       },
       {
         path: 'videos',

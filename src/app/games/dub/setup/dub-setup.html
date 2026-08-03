@@ -1,44 +1,114 @@
+<app-top-bar />
 <div class="center-screen">
-  <form class="card card-wide" (ngSubmit)="submit()">
+  <form class="card card-wide" [class.card-video-wide]="mode() === 'manual'" (ngSubmit)="submit()">
     <h1>Doublage Party</h1>
-    <p>Chaque vidéo choisie devient une manche, dans l'ordre où tu la sélectionnes.</p>
+    <p>Une manche, une vidéo. Choisis combien de manches, puis comment piocher.</p>
 
-    <div class="video-picker">
-      <div class="video-picker-header">
-        <span>Bibliothèque de vidéos</span>
-        <span class="rounds-count">{{ selectedVideoIds().length }} manche(s)</span>
+    @if (loadingVideos()) {
+      <app-loading-overlay label="Chargement de la bibliothèque..." />
+    } @else if (videos().length === 0) {
+      <p class="error">
+        La bibliothèque est vide. Ajoute des vidéos avant de créer un lobby.
+      </p>
+    } @else {
+      <div class="rounds-picker">
+        <span class="field-label">Nombre de manches</span>
+        <div class="stepper">
+          <button
+            type="button"
+            class="step-btn"
+            (click)="setRounds(roundsCount() - 1)"
+            [disabled]="roundsCount() <= 1"
+          >
+            −
+          </button>
+          <span class="rounds-value">{{ roundsCount() }}</span>
+          <button
+            type="button"
+            class="step-btn"
+            (click)="setRounds(roundsCount() + 1)"
+            [disabled]="roundsCount() >= maxRounds()"
+          >
+            +
+          </button>
+        </div>
+        <span class="max-hint">{{ videos().length }} vidéo(s) disponibles</span>
       </div>
 
-      @if (loadingVideos()) {
-        <p>Chargement...</p>
-      } @else if (videos().length === 0) {
-        <p>
-          Aucune vidéo dans la bibliothèque pour l'instant. Ajoute-en depuis la page
-          d'administration des vidéos.
-        </p>
-      } @else {
-        <ul class="video-list">
-          @for (video of videos(); track video.id) {
-            <li
-              class="video-item"
-              [class.selected]="isSelected(video.id)"
-              (click)="toggleVideo(video.id)"
-            >
-              @if (isSelected(video.id)) {
-                <span class="round-badge">{{ roundNumber(video.id) }}</span>
-              }
-              <span class="video-title">{{ video.title }}</span>
-            </li>
-          }
-        </ul>
+      <div class="mode-picker">
+        <button
+          type="button"
+          class="mode-btn"
+          [class.active]="mode() === 'random'"
+          (click)="setMode('random')"
+        >
+          <span class="mode-title">Aléatoire</span>
+          <span class="mode-desc">Le site tire les vidéos au sort</span>
+        </button>
+
+        <button
+          type="button"
+          class="mode-btn"
+          [class.active]="mode() === 'manual'"
+          (click)="setMode('manual')"
+        >
+          <span class="mode-title">Je choisis</span>
+          <span class="mode-desc">Tu sélectionnes chaque vidéo</span>
+        </button>
+      </div>
+
+      @if (mode() === 'manual') {
+        <div class="video-picker">
+          <div class="video-picker-header">
+            <span>Bibliothèque de vidéos</span>
+            <span class="rounds-count">
+              {{ selectedVideoIds().length }} / {{ roundsCount() }} choisies
+            </span>
+          </div>
+
+          <ul class="video-grid">
+            @for (video of videos(); track video.id) {
+              <li
+                class="video-card"
+                [class.selected]="isSelected(video.id)"
+                [class.disabled]="!isSelected(video.id) && remainingToPick() === 0"
+                (click)="toggleVideo(video.id)"
+              >
+                <div class="video-thumb-frame">
+                  @if (thumbnailUrl(video.thumbnail_key); as thumb) {
+                    <img class="video-thumb" [src]="thumb" alt="" />
+                  } @else {
+                    <div class="video-thumb video-thumb-empty">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M4 6a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        />
+                        <path d="M10 10.5v5l4.5-2.5-4.5-2.5Z" fill="currentColor" />
+                      </svg>
+                    </div>
+                  }
+                  @if (isSelected(video.id)) {
+                    <span class="round-badge">{{ roundNumber(video.id) }}</span>
+                  }
+                  @if (video.duration_seconds) {
+                    <span class="duration-badge">{{ video.duration_seconds }}s</span>
+                  }
+                </div>
+                <span class="video-title">{{ video.title }}</span>
+              </li>
+            }
+          </ul>
+        </div>
       }
-    </div>
+    }
 
     @if (error()) {
       <p class="error">{{ error() }}</p>
     }
 
-    <button type="submit" [disabled]="loading()">
+    <button type="submit" [disabled]="loading() || !canSubmit()">
       {{ loading() ? 'Création...' : 'Créer le lobby' }}
     </button>
   </form>

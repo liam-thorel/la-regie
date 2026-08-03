@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -15,12 +16,16 @@ import { AuthService } from '../../../core/services/auth';
 import { VideoLibraryService } from '../../../core/services/video-library';
 import { DubGameService, DubWithPlayer } from '../services/dub-game';
 import { RecordingService } from '../services/recording';
+import { SoundService } from '../../../core/services/sound';
+import { AppVolumeService } from '../../../core/services/app-volume';
 import { Lobby, Player, VideoAsset } from '../../../core/models/types';
 import { Scoreboard } from '../../../shared/scoreboard/scoreboard';
+import { TopBar } from '../../../shared/top-bar/top-bar';
+import { LoadingOverlay } from '../../../shared/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-dub-round',
-  imports: [Scoreboard],
+  imports: [LoadingOverlay, TopBar, Scoreboard],
   templateUrl: './dub-round.html',
   styleUrl: './dub-round.scss',
 })
@@ -31,7 +36,9 @@ export class DubRound implements OnInit, OnDestroy {
   private readonly videoLibrary = inject(VideoLibraryService);
   private readonly dubGame = inject(DubGameService);
   readonly recorder = inject(RecordingService);
+  private readonly sound = inject(SoundService);
   readonly auth = inject(AuthService);
+  readonly volumeService = inject(AppVolumeService);
 
   private readonly videoRef = viewChild<ElementRef<HTMLVideoElement>>('videoEl');
   private readonly reviewAudioRef = viewChild<ElementRef<HTMLAudioElement>>('reviewAudioEl');
@@ -69,6 +76,18 @@ export class DubRound implements OnInit, OnDestroy {
 
   readonly hasValidated = computed(() => this.myDub()?.is_locked === true);
 
+  constructor() {
+    // Le volume choisi dans le menu sert de réglage de départ pour la
+    // vidéo ; les contrôles natifs restent libres de le changer ensuite.
+    effect(() => {
+      const volume = this.volumeService.volume();
+      const video = this.videoRef()?.nativeElement;
+      const reviewAudio = this.reviewAudioRef()?.nativeElement;
+      if (video) video.volume = volume;
+      if (reviewAudio) reviewAudio.volume = volume;
+    });
+  }
+
   readonly allValidated = computed(
     () => this.players().length > 0 && this.lockedPlayerIds().length >= this.players().length,
   );
@@ -82,14 +101,23 @@ export class DubRound implements OnInit, OnDestroy {
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') ?? '';
 
     try {
-      const [lobby, players, myPlayer] = await Promise.all([
+      const [lobby, players, myPlayer, phase] = await Promise.all([
         this.lobbyService.getLobby(this.lobbyId),
         this.lobbyService.listPlayers(this.lobbyId),
         this.lobbyService.getMyPlayer(this.lobbyId),
+        this.dubGame.getPhase(this.lobbyId),
       ]);
 
       if (!lobby) {
         this.error.set('Partie introuvable.');
+        return;
+      }
+
+      // Reprise après rechargement : si la partie a avancé pendant notre
+      // absence, direction le bon écran plutôt qu'une manche périmée.
+      const screen = this.dubGame.resolveScreen(lobby, phase?.phase ?? null);
+      if (screen !== 'manche') {
+        this.router.navigate(['/jeu/doublage', this.lobbyId, screen]);
         return;
       }
 
@@ -107,6 +135,8 @@ export class DubRound implements OnInit, OnDestroy {
       if (this.isHost) {
         await this.dubGame.openRecording(this.lobbyId);
       }
+
+      this.sound.playChime();
     } catch {
       this.error.set('Impossible de charger la manche.');
     } finally {

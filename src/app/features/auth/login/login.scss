@@ -1,1 +1,17 @@
-/* styles spécifiques login : rien pour l'instant, tout vient de styles.scss */
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.brand-name {
+  font-weight: 650;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 1.25rem;
+}

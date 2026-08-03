@@ -1,3 +1,4 @@
+<app-top-bar />
 <div class="game-layout">
   <app-scoreboard
     [players]="players()"
@@ -7,7 +8,7 @@
 
   <main class="stage-main">
     @if (loading()) {
-      <p>Chargement des votes...</p>
+      <app-loading-overlay label="Chargement des votes..." />
     } @else if (error() && dubs().length === 0) {
       <p class="error">{{ error() }}</p>
     } @else {
@@ -88,7 +89,7 @@
                   autoplay
                   loop
                 ></video>
-                <audio [src]="audioUrl(dub)" controls autoplay></audio>
+                <audio [src]="audioUrl(dub)" controls autoplay [volume]="volumeService.volume()"></audio>
               </div>
             }
 

@@ -1,3 +1,4 @@
+<app-top-bar />
 <div class="game-layout">
   <app-scoreboard
     [players]="players()"
@@ -7,7 +8,7 @@
 
   <main class="stage-main">
     @if (loading()) {
-      <p>Chargement de la manche...</p>
+      <app-loading-overlay label="Chargement de la manche..." />
     } @else if (error() && !video()) {
       <p class="error">{{ error() }}</p>
     } @else {

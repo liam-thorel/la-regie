@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from '../../../core/services/supabase';
-import { Dub, DubPhase, VideoAsset, Vote } from '../../../core/models/types';
+import { Dub, DubPhase, DubSettings, Lobby, VideoAsset, Vote } from '../../../core/models/types';
 
 /** Une prise déposée, enrichie du joueur qui l'a faite. */
 export interface DubWithPlayer extends Dub {
@@ -269,6 +269,37 @@ export class DubGameService {
     if (paths.length > 0) {
       await this.supabase.storage.from('dubs').remove(paths);
     }
+  }
+
+  /**
+   * Détermine l'écran où un joueur devrait se trouver, à partir de l'état
+   * réel en base plutôt que de l'URL. Utilisé au chargement de la manche,
+   * de la diffusion et du vote : sans ça, recharger la page pendant que la
+   * partie a avancé (Wi-Fi qui saute, téléphone qui se met en veille)
+   * laissait le joueur bloqué sur un écran périmé, qui ne se corrigeait
+   * que via un futur changement d'état, jamais au chargement lui-même.
+   */
+  resolveScreen(lobby: Lobby, phase: DubPhase | null): 'manche' | 'diffusion' | 'vote' | 'podium' {
+    if (lobby.status === 'finished') return 'podium';
+    if (phase === 'playback') return 'diffusion';
+    if (phase === 'voting') return 'vote';
+    return 'manche';
+  }
+
+  /**
+   * Canal d'annonce de revanche : quand l'host relance une partie depuis le
+   * podium, les autres joueurs encore sur cet écran reçoivent directement
+   * le code de la nouvelle partie, sans avoir à le demander à l'oral.
+   */
+  rematchChannel(oldLobbyId: string, onRematch: (code: string) => void): RealtimeChannel {
+    return this.supabase
+      .channel(`rematch:${oldLobbyId}`)
+      .on('broadcast', { event: 'rematch' }, (message) => onRematch(message['payload'].code))
+      .subscribe();
+  }
+
+  async announceRematch(channel: RealtimeChannel, code: string): Promise<void> {
+    await channel.send({ type: 'broadcast', event: 'rematch', payload: { code } });
   }
 
   /** URL d'écoute d'une prise enregistrée. */

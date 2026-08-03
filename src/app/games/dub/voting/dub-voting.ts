@@ -5,8 +5,12 @@ import { LobbyService } from '../../../core/services/lobby';
 import { AuthService } from '../../../core/services/auth';
 import { VideoLibraryService } from '../../../core/services/video-library';
 import { DubGameService, DubWithPlayer, VoteWithVoter } from '../services/dub-game';
+import { SoundService } from '../../../core/services/sound';
+import { AppVolumeService } from '../../../core/services/app-volume';
 import { Lobby, Player, VideoAsset } from '../../../core/models/types';
 import { Scoreboard } from '../../../shared/scoreboard/scoreboard';
+import { TopBar } from '../../../shared/top-bar/top-bar';
+import { LoadingOverlay } from '../../../shared/loading-overlay/loading-overlay';
 
 type VoteValue = -1 | 0 | 1 | 2;
 
@@ -17,7 +21,7 @@ type VoteValue = -1 | 0 | 1 | 2;
  */
 @Component({
   selector: 'app-dub-voting',
-  imports: [Scoreboard],
+  imports: [LoadingOverlay, TopBar, Scoreboard],
   templateUrl: './dub-voting.html',
   styleUrl: './dub-voting.scss',
 })
@@ -28,6 +32,8 @@ export class DubVoting implements OnInit, OnDestroy {
   private readonly videoLibrary = inject(VideoLibraryService);
   private readonly dubGame = inject(DubGameService);
   readonly auth = inject(AuthService);
+  readonly volumeService = inject(AppVolumeService);
+  private readonly sound = inject(SoundService);
 
   readonly lobby = signal<Lobby | null>(null);
   readonly players = signal<Player[]>([]);
@@ -93,14 +99,23 @@ export class DubVoting implements OnInit, OnDestroy {
     this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') ?? '';
 
     try {
-      const [lobby, players, myPlayer] = await Promise.all([
+      const [lobby, players, myPlayer, phase] = await Promise.all([
         this.lobbyService.getLobby(this.lobbyId),
         this.lobbyService.listPlayers(this.lobbyId),
         this.lobbyService.getMyPlayer(this.lobbyId),
+        this.dubGame.getPhase(this.lobbyId),
       ]);
 
       if (!lobby) {
         this.error.set('Partie introuvable.');
+        return;
+      }
+
+      // Reprise après rechargement : la partie a pu avancer pendant notre
+      // absence (manche suivante, voire partie terminée).
+      const screen = this.dubGame.resolveScreen(lobby, phase?.phase ?? null);
+      if (screen !== 'vote') {
+        this.router.navigate(['/jeu/doublage', this.lobbyId, screen]);
         return;
       }
 
@@ -117,6 +132,8 @@ export class DubVoting implements OnInit, OnDestroy {
       this.video.set(video);
       this.dubs.set(dubs);
       this.votes.set(votes);
+
+      this.sound.playPing();
     } catch {
       this.error.set('Impossible de charger les votes.');
     } finally {

@@ -1,0 +1,34 @@
+.config-warning {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.config-warning-card {
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+
+  h1 {
+    font-size: 1.3rem;
+    margin: 8px 0 14px;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+}
+
+.config-warning-note {
+  margin-top: 14px;
+  font-size: 0.85rem;
+}

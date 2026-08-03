@@ -1,9 +1,10 @@
+<app-top-bar />
 <div class="game-layout">
   <app-scoreboard [players]="players()" [myPlayerId]="myPlayer()?.id ?? null" />
 
   <main class="stage-main">
     @if (loading()) {
-      <p>Chargement de la diffusion...</p>
+      <app-loading-overlay label="Chargement de la diffusion..." />
     } @else if (error()) {
       <p class="error">{{ error() }}</p>
     } @else if (dubs().length === 0) {

@@ -102,7 +102,78 @@ export class AuthService {
   }
 
   async signIn(email: string, password: string): Promise<{ error: string | null }> {
-    const { error } = await this.supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      return { error: error?.message ?? 'Connexion impossible.' };
+    }
+
+    // Sans cette attente, le composant navigue avant que currentProfile()
+    // soit rempli : le garde de route voit un profil encore vide et
+    // renvoie vers /login, d'où l'impression qu'il faut se connecter deux
+    // fois. onAuthStateChange rechargera le profil aussi, sans conséquence.
+    await this.loadProfile(data.user.id);
+    return { error: null };
+  }
+
+  /**
+   * Met à jour pseudo et/ou photo. Les lobbies déjà rejoints gardent le
+   * pseudo et la photo tels qu'ils étaient au moment de les rejoindre
+   * (copiés dans la table players) : seules les parties rejointes après
+   * ce changement verront la nouvelle valeur.
+   */
+  async updateProfile(
+    pseudo: string,
+    avatarFile: File | null,
+  ): Promise<{ error: string | null }> {
+    const profile = this.currentProfile();
+    if (!profile) return { error: 'Vous devez être connecté.' };
+
+    let avatarUrl = profile.avatar_url;
+
+    if (avatarFile) {
+      const path = `${profile.id}/${crypto.randomUUID()}-${avatarFile.name}`;
+      const { error: uploadError } = await this.supabase.storage
+        .from('avatars')
+        .upload(path, avatarFile, { upsert: true });
+
+      if (uploadError) {
+        return { error: "L'envoi de la photo a échoué." };
+      }
+      avatarUrl = this.supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    }
+
+    const { error } = await this.supabase
+      .from('profiles')
+      .update({ pseudo, avatar_url: avatarUrl })
+      .eq('id', profile.id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    this.currentProfile.set({ ...profile, pseudo, avatar_url: avatarUrl });
+    return { error: null };
+  }
+
+  /**
+   * Envoie un email de réinitialisation. Réponse volontairement générique
+   * dans tous les cas côté écran : révéler si l'adresse correspond à un
+   * compte existant serait une fuite d'information.
+   */
+  async requestPasswordReset(email: string): Promise<{ error: string | null }> {
+    const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/nouveau-mot-de-passe`,
+    });
+    return { error: error?.message ?? null };
+  }
+
+  /**
+   * Définit un nouveau mot de passe. N'a de sens qu'après avoir cliqué le
+   * lien reçu par email : celui-ci ouvre une session de récupération
+   * temporaire que le client Supabase détecte tout seul depuis l'URL.
+   */
+  async updatePassword(newPassword: string): Promise<{ error: string | null }> {
+    const { error } = await this.supabase.auth.updateUser({ password: newPassword });
     return { error: error?.message ?? null };
   }
 

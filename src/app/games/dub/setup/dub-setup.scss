@@ -1,3 +1,108 @@
+
+/* Élargi d'environ 20% par rapport aux cartes standard du site : cette
+   règle ne s'applique qu'à cet écran (styles de composant Angular),
+   les autres formulaires qui utilisent .card-wide ne bougent pas. */
+.card-wide {
+  max-width: 720px;
+}
+
+.card-video-wide {
+  max-width: 920px;
+}
+
+.rounds-picker {
+  margin-bottom: 22px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.step-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 1rem;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 6px;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+}
+
+.rounds-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1rem;
+  min-width: 3ch;
+  text-align: center;
+}
+
+.max-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+/* ---------- Mode de sélection ---------- */
+
+.mode-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 14px 16px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
+
+  &.active {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  }
+}
+
+.mode-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.mode-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 450;
+}
+
+/* ---------- Bibliothèque ---------- */
+
 .video-picker {
   margin-bottom: 20px;
 }
@@ -6,66 +111,113 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 10px;
 }
 
 .rounds-count {
   font-family: var(--font-mono);
-  color: var(--gold);
+  font-size: 0.75rem;
+  color: var(--text);
 }
 
-.video-list {
+.video-grid {
   list-style: none;
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 320px;
+  padding: 2px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 16px;
+  max-height: 460px;
   overflow-y: auto;
 }
 
-.video-item {
+.video-card {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  flex-direction: column;
+  gap: 6px;
   cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease;
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  transition: background 0.13s var(--ease);
 
   &:hover {
-    border-color: var(--gold);
+    background: var(--surface-2);
   }
 
-  &.selected {
-    background: var(--surface-2);
-    border-color: var(--gold);
+  &.selected .video-thumb-frame {
+    border-color: var(--accent);
   }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: default;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+.video-thumb-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transition: border-color 0.13s var(--ease);
+}
+
+.video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
 }
 
 .round-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--gold);
-  color: var(--gold-ink);
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--accent);
+  color: var(--on-accent);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 600;
 }
 
+.duration-badge {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  background: rgba(10, 11, 18, 0.75);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
 .video-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }

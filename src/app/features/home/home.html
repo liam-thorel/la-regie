@@ -1,46 +1,72 @@
 <div class="hub">
   <header class="hub-header">
     <div class="brand">
-      <div class="waveform" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <span class="brand-name">La Régie</span>
+      <app-wheel-logo [size]="36" />
+      <span class="brand-name">Olygames</span>
     </div>
 
     @if (auth.currentProfile(); as profile) {
       <div class="profile-row">
-        @if (profile.avatar_url) {
-          <img class="avatar" [src]="profile.avatar_url" alt="" />
-        } @else {
-          <span class="avatar avatar-fallback">{{ profile.pseudo.charAt(0) }}</span>
-        }
-        <span>{{ profile.pseudo }}</span>
+        <a class="profile-link" routerLink="/profil">
+          @if (profile.avatar_url) {
+            <img class="avatar" [src]="profile.avatar_url" alt="" />
+          } @else {
+            <span class="avatar avatar-fallback">{{ profile.pseudo.charAt(0) }}</span>
+          }
+          <span class="profile-name">{{ profile.pseudo }}</span>
+        </a>
         <button class="link-btn" (click)="logout()">Se déconnecter</button>
       </div>
     }
   </header>
 
   <main class="hub-main">
-    <h1>Choisis ton jeu</h1>
+    <section class="hero">
+      <h1>Jouer entre amis</h1>
+      <p>Crée un lobby, partage le code, c'est parti.</p>
+    </section>
 
-    <ul class="game-grid">
-      @for (game of games; track game.id) {
-        <li class="game-tile" [class.locked]="!game.available">
-          <h2>{{ game.name }}</h2>
-          <p>{{ game.tagline }}</p>
-          @if (game.available) {
-            <a class="btn btn-primary" [routerLink]="game.setupRoute">Créer un lobby</a>
-          } @else {
-            <span class="soon">Bientôt</span>
-          }
-        </li>
-      }
-    </ul>
+    <section class="games-section">
+      <div class="section-head">
+        <span class="field-label">Jeux</span>
+      </div>
 
-    <div class="join-strip">
-      <span>Un ami t'a donné un code ?</span>
-      <a class="btn btn-secondary" routerLink="/rejoindre">Rejoindre un lobby</a>
-    </div>
+      <ul class="game-grid">
+        @for (game of games; track game.id; let i = $index) {
+          <li
+            class="game-card"
+            [class.locked]="!game.available"
+            [style.--game-color]="colorFor(i)"
+          >
+            <div class="game-body">
+              <h2>{{ game.name }}</h2>
+              <p>{{ game.tagline }}</p>
+              <div class="game-meta">
+                <span>{{ game.minPlayers }}+ joueurs</span>
+                <span class="meta-sep"></span>
+                <span>Parties courtes</span>
+              </div>
+            </div>
+
+            @if (game.available) {
+              <a class="btn btn-primary game-cta" [routerLink]="game.setupRoute">
+                Créer un lobby
+              </a>
+            } @else {
+              <span class="soon">Bientôt disponible</span>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="join-strip">
+      <div>
+        <span class="join-title">Rejoindre une partie</span>
+        <span class="join-desc">Un ami t'a donné un code de lobby ?</span>
+      </div>
+      <a class="btn btn-secondary" routerLink="/rejoindre">Entrer un code</a>
+    </section>
 
     @if (auth.isAdmin()) {
       <a class="library-link" routerLink="/videos">Gérer la bibliothèque de vidéos</a>

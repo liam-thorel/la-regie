@@ -1,8 +1,11 @@
-<div class="center-screen">
-  <div class="card card-wide">
+<app-top-bar />
+<div class="library-page">
+  <header class="library-head">
     <h1>Bibliothèque de vidéos</h1>
     <p>Les vidéos ajoutées ici sont proposées à la création d'un lobby.</p>
+  </header>
 
+  <div class="card upload-card">
     <div class="upload-box">
       <label class="file-drop" for="videoFile">
         {{ fileName() ?? 'Choisir une vidéo' }}
@@ -33,29 +36,78 @@
     </div>
 
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="error upload-error">{{ error() }}</p>
     }
-
-    <h2>Vidéos disponibles ({{ videos().length }})</h2>
-
-    @if (loading()) {
-      <p>Chargement...</p>
-    } @else if (videos().length === 0) {
-      <p>La bibliothèque est vide. Ajoute une première vidéo ci-dessus.</p>
-    } @else {
-      <ul class="library-list">
-        @for (video of videos(); track video.id) {
-          <li class="library-row">
-            <span class="video-title">{{ video.title }}</span>
-            @if (video.duration_seconds) {
-              <span class="duration">{{ video.duration_seconds }}s</span>
-            }
-            <button class="link-btn" (click)="remove(video)">Supprimer</button>
-          </li>
-        }
-      </ul>
-    }
-
-    <a class="btn btn-secondary back-btn" routerLink="/">Retour à l'accueil</a>
   </div>
+
+  <div class="section-head">
+    <span class="field-label">Vidéos disponibles ({{ videos().length }})</span>
+  </div>
+
+  @if (loading()) {
+    <app-loading-overlay />
+  } @else if (videos().length === 0) {
+    <p>La bibliothèque est vide. Ajoute une première vidéo ci-dessus.</p>
+  } @else {
+    <ul class="video-grid">
+      @for (video of videos(); track video.id) {
+        <li class="video-card">
+          <div class="video-thumb-frame">
+            @if (thumbnailUrl(video.thumbnail_key); as thumb) {
+              <img class="video-thumb" [src]="thumb" alt="" />
+            } @else {
+              <div class="video-thumb video-thumb-empty">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M4 6a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <path d="M10 10.5v5l4.5-2.5-4.5-2.5Z" fill="currentColor" />
+                </svg>
+              </div>
+            }
+            @if (video.duration_seconds) {
+              <span class="duration-badge">{{ video.duration_seconds }}s</span>
+            }
+          </div>
+
+          @if (editingId() === video.id) {
+            <div class="rename-box">
+              <input
+                type="text"
+                class="rename-input"
+                maxlength="80"
+                [ngModel]="editingTitle()"
+                (ngModelChange)="editingTitle.set($event)"
+                (keyup.enter)="saveRename(video)"
+                (keyup.escape)="cancelRename()"
+              />
+              <div class="rename-actions">
+                <button class="link-btn" (click)="saveRename(video)">Enregistrer</button>
+                <button class="link-btn" (click)="cancelRename()">Annuler</button>
+              </div>
+            </div>
+          } @else {
+            <span class="video-title">{{ video.title }}</span>
+            <div class="video-actions">
+              <button class="link-btn" (click)="startRename(video)">Renommer</button>
+              @if (!video.thumbnail_key) {
+                <button
+                  class="link-btn"
+                  (click)="generateThumbnail(video)"
+                  [disabled]="generatingId() === video.id"
+                >
+                  {{ generatingId() === video.id ? 'Génération...' : "Générer l'aperçu" }}
+                </button>
+              }
+              <button class="link-btn" (click)="remove(video)">Supprimer</button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <a class="btn btn-secondary back-btn" routerLink="/">Retour à l'accueil</a>
 </div>

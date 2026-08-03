@@ -19,8 +19,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
-  color: var(--gold);
+  font-weight: 600;
+  color: var(--text);
 }
 
 .avatar {
@@ -54,6 +54,12 @@
   }
 }
 
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+  }
+}
+
 .hint {
   margin-top: 14px;
   text-align: center;
@@ -63,7 +69,8 @@
 .waiting-play {
   flex: 1;
   margin: 0;
-  padding: 13px;
-  border: 1px dashed var(--border);
+  padding: 11px;
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius-sm);
+  text-align: center;
 }

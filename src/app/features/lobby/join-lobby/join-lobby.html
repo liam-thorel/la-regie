@@ -1,4 +1,9 @@
+<app-top-bar />
 <div class="center-screen">
+  @if (autoJoining() && loading()) {
+    <app-loading-overlay label="Connexion à la partie..." />
+  }
+
   <form class="auth-card" (ngSubmit)="submit()">
     <h1>Rejoindre un lobby</h1>
     <p>Demande le code à l'host de la partie.</p>

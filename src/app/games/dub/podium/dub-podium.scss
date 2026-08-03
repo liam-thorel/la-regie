@@ -1,4 +1,57 @@
 .podium-screen {
+  position: relative;
+}
+
+/* ---------- Confettis ---------- */
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.confetti {
+  position: absolute;
+  top: -20px;
+  width: 7px;
+  height: 11px;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  /* Une seule salve à l'arrivée sur l'écran, puis plus rien */
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -10vh, 0) rotate(var(--tilt));
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
+    transform: translate3d(var(--drift), 105vh, 0) rotate(calc(var(--tilt) + 540deg));
+  }
+}
+
+/* Le contenu passe devant les confettis */
+.podium-header,
+.podium,
+.ranking,
+.trophies,
+.podium-actions,
+.close-hint {
+  position: relative;
+  z-index: 1;
+}
+
+.podium-screen {
   max-width: 720px;
   margin: 0 auto;
   padding: 40px 24px 60px;
@@ -30,6 +83,26 @@ h1 {
   justify-content: center;
   gap: 12px;
   margin-bottom: 48px;
+}
+
+@media (max-width: 420px) {
+  .podium {
+    gap: 6px;
+  }
+
+  .step .pseudo {
+    font-size: 0.82rem;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .step[data-place='1'] .avatar {
+    width: 54px;
+    height: 54px;
+  }
 }
 
 .step {
@@ -65,14 +138,14 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--border);
-  font-family: var(--font-mono);
+  background: var(--surface-2);
+  font-weight: 600;
   text-transform: uppercase;
 }
 
 .step .pseudo {
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .step .points {
@@ -87,40 +160,65 @@ h1 {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-bottom: none;
+  animation: block-rise 0.4s var(--ease) both;
+}
+
+@keyframes block-rise {
+  from {
+    transform: scaleY(0.2);
+    transform-origin: bottom;
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .place {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.5rem;
   color: var(--text-muted);
 }
 
 .step[data-place='1'] {
   .block {
-    height: 130px;
-    background: linear-gradient(180deg, var(--gold) 0%, #c98f26 100%);
-    border-color: var(--gold);
+    height: 124px;
+    border-top: 3px solid var(--c-gold);
   }
   .place {
-    color: var(--gold-ink);
-    font-size: 2.4rem;
+    color: var(--c-gold);
+    font-size: 2rem;
   }
   .avatar {
-    width: 68px;
-    height: 68px;
-    border: 2px solid var(--gold);
+    width: 62px;
+    height: 62px;
+    border: 2px solid var(--c-gold);
   }
 }
 
-.step[data-place='2'] .block {
-  height: 96px;
+.step[data-place='2'] {
+  .block {
+    height: 94px;
+    border-top: 3px solid var(--text-muted);
+  }
+  .place {
+    color: var(--text-muted);
+  }
 }
 
-.step[data-place='3'] .block {
-  height: 70px;
+.step[data-place='3'] {
+  .block {
+    height: 70px;
+    border-top: 3px solid #b0764a;
+  }
+  .place {
+    color: #b0764a;
+  }
 }
 
 /* ---------- Classement ---------- */
@@ -161,7 +259,7 @@ h2 {
   .points {
     font-family: var(--font-mono);
     font-weight: 600;
-    color: var(--gold);
+    color: var(--text);
   }
 }
 
@@ -184,6 +282,8 @@ h2 {
 }
 
 .trophy {
+  position: relative;
+  overflow: hidden;
   padding: 18px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -192,24 +292,32 @@ h2 {
   flex-direction: column;
   gap: 4px;
 
-  &[data-trophy='hater'] {
-    border-color: var(--danger);
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
   }
 
-  &[data-trophy='liker'] {
-    border-color: var(--pink);
+  &[data-trophy='hater']::before {
+    background: var(--danger);
   }
 
-  &[data-trophy='goat'] {
-    border-color: var(--cyan);
+  &[data-trophy='liker']::before {
+    background: var(--like);
+  }
+
+  &[data-trophy='goat']::before {
+    background: var(--super);
   }
 }
 
 .trophy-label {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 650;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
 }
 
 .trophy-winner {
@@ -248,11 +356,11 @@ h2 {
 
 .danger {
   color: var(--danger);
-  border-color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
 
   &:hover:not(:disabled) {
-    background: var(--danger);
-    color: #2b0508;
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+    border-color: var(--danger);
   }
 }
 
@@ -260,4 +368,28 @@ h2 {
   margin-top: 12px;
   text-align: center;
   font-size: 0.78rem;
+}
+
+.rematch-banner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+
+  .btn {
+    width: auto;
+  }
+}
+
+.rematch-btn {
+  width: auto;
 }

@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Stress test
+stress-test/node_modules
+stress-test/.env

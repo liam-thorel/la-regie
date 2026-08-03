@@ -1,0 +1,125 @@
+<app-top-bar />
+<div class="profile-page">
+  <header class="profile-head">
+    <h1>Mon profil</h1>
+    @if (auth.currentProfile(); as profile) {
+      <p class="member-since">Membre depuis {{ formatMemberSince(profile.created_at) }}</p>
+    }
+  </header>
+
+  <form class="card profile-card" (ngSubmit)="save()">
+    <div class="avatar-picker">
+      <label class="avatar-drop" for="avatar">
+        @if (avatarPreview()) {
+          <img [src]="avatarPreview()" alt="" />
+        } @else {
+          <span>Photo</span>
+        }
+      </label>
+      <input id="avatar" type="file" accept="image/*" (change)="onAvatarSelected($event)" />
+    </div>
+
+    <label>
+      Pseudo
+      <input
+        type="text"
+        name="pseudo"
+        required
+        maxlength="24"
+        [ngModel]="pseudo()"
+        (ngModelChange)="pseudo.set($event)"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="saving()">
+      {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+    </button>
+
+    @if (saved()) {
+      <p class="saved-hint">Profil mis à jour.</p>
+    }
+
+    <p class="rename-note">
+      Change ici, ça s'applique aux prochaines parties que tu rejoins ; les
+      parties déjà en cours gardent ton pseudo et ta photo tels qu'ils
+      étaient au moment d'y entrer.
+    </p>
+  </form>
+
+  <section class="stats-section">
+    <div class="section-head">
+      <span class="field-label">Statistiques</span>
+    </div>
+
+    @if (loadingStats()) {
+      <app-loading-overlay label="Chargement des statistiques..." />
+    } @else if (gameStatsRows().length === 0) {
+      <p>Aucun jeu disponible pour l'instant.</p>
+    } @else {
+      <ul class="game-stats-list">
+        @for (row of gameStatsRows(); track row.gameId) {
+          <li class="game-stats-card">
+            <h2>{{ row.gameName }}</h2>
+
+            <div class="stat-grid">
+              <div class="stat">
+                <span class="stat-value">{{ row.stats.gamesPlayed }}</span>
+                <span class="stat-label">Parties jouées</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">{{ row.stats.wins }}</span>
+                <span class="stat-label">Victoires</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">
+                  {{
+                    row.stats.gamesPlayed > 0
+                      ? ((row.stats.wins / row.stats.gamesPlayed) * 100).toFixed(0) + '%'
+                      : '—'
+                  }}
+                </span>
+                <span class="stat-label">Taux de victoire</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">{{ row.stats.bestScore ?? '—' }}</span>
+                <span class="stat-label">Meilleur score</span>
+              </div>
+            </div>
+
+            @if ((row.trophyLabels | keyvalue)?.length) {
+              <div class="trophy-row">
+                @for (entry of row.trophyLabels | keyvalue; track entry.key) {
+                  <div class="trophy-chip">
+                    <span class="trophy-count">{{ row.stats.trophyCounts[entry.key] ?? 0 }}</span>
+                    <span class="trophy-name">{{ entry.value }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (row.recent.length > 0) {
+              <div class="recent-block">
+                <span class="recent-title">Dernières parties</span>
+                <ul class="recent-list">
+                  @for (r of row.recent; track r.playedAt) {
+                    <li class="recent-row">
+                      <span class="recent-date">{{ formatShortDate(r.playedAt) }}</span>
+                      <span class="recent-placement">{{ ordinal(r.placement) }} / {{ r.playerCount }}</span>
+                      <span class="recent-score">{{ r.score }} pts</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <a class="btn btn-secondary back-btn" routerLink="/">Retour à l'accueil</a>
+</div>

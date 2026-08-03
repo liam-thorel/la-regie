@@ -1,0 +1,41 @@
+<header class="top-bar">
+  <a class="top-bar-brand" routerLink="/" aria-label="Retour à l'accueil">
+    <app-wheel-logo [size]="24" />
+  </a>
+
+  <div class="menu-wrap">
+    <button
+      class="burger-btn"
+      (click)="toggle()"
+      [attr.aria-expanded]="open()"
+      aria-label="Menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    @if (open()) {
+      <div class="menu-backdrop" (click)="close()"></div>
+
+      <div class="menu-panel">
+        <a class="menu-item" routerLink="/" (click)="close()">Retour à l'accueil</a>
+        <a class="menu-item" routerLink="/profil" (click)="close()">Mon profil</a>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-volume">
+          <div class="menu-volume-head">
+            <span class="field-label">Volume</span>
+            <span class="menu-volume-value">{{ (volumeService.volume() * 100).toFixed(0) }}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            [value]="volumeService.volume() * 100"
+            (input)="onVolumeInput($event)"
+          />
+        </div>
+      </div>
+    }
+  </div>
+</header>

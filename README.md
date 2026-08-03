@@ -1,6 +1,8 @@
-# La Régie
+# Olygames
 
 Plateforme de jeux à jouer entre amis dans le navigateur, en lobbies.
+Le parc d'attractions : chaque jeu est une attraction, la grande roue est
+l'emblème du site.
 Premier jeu disponible : **Doublage Party**, où chacun refait la bande-son
 d'une vidéo, puis le groupe vote.
 
@@ -17,9 +19,14 @@ gratuits.
    - `supabase/01-core.sql` (noyau commun à tous les jeux)
    - `supabase/02-jeu-doublage.sql` (tables du jeu de doublage)
    - `supabase/03-storage.sql` (buckets avatars et doublages audio)
+   - `supabase/04-admin.sql` (réserve la bibliothèque de vidéos à l'admin)
 3. Dans **Authentication > Providers**, garder Email activé. Pour tester
    entre amis sans friction, désactiver la confirmation par email dans
    **Authentication > Sign In / Providers > Email**.
+3bis. Dans **Authentication > URL Configuration > Redirect URLs**, ajouter
+   `http://localhost:4200/**` et l'URL Netlify une fois déployée (ex.
+   `https://ton-site.netlify.app/**`). Sans ça, le lien de réinitialisation
+   de mot de passe est rejeté par Supabase au clic.
 4. Récupérer l'URL du projet et la clé `anon` dans **Settings > API**, puis
    les reporter dans `src/environments/environment.ts`.
 
@@ -103,7 +110,7 @@ Le projet est pensé pour accueillir d'autres jeux sans rien casser.
 src/app/
   core/       comptes, lobbies, joueurs, temps réel   (partagé par tous les jeux)
     models/game-registry.ts     le catalogue des jeux
-  shared/     composants réutilisables (tableau des scores)
+  shared/     composants réutilisables (logo grande roue, tableau des scores)
   features/   écrans communs : connexion, hub, rejoindre, salle d'attente, vidéos
   games/
     dub/      le jeu de doublage, isolé et chargé à la demande
@@ -122,6 +129,19 @@ supabase/
 Le noyau n'a pas à être modifié : la table `lobbies` porte un `game_id` en
 texte libre et un champ `settings` en JSON, donc un jeu aux réglages
 totalement différents ne demande aucune migration.
+
+### Bibliothèque de vidéos réservée à l'admin
+
+Seuls les comptes listés dans la table `admins` peuvent ajouter ou supprimer
+des vidéos ; tout le monde peut les lire pour jouer. Le verrou existe à trois
+niveaux : règles RLS sur la table `videos`, contrôle dans l'Edge Function qui
+signe les uploads R2, et masquage de l'écran côté interface.
+
+Pour ajouter un administrateur, une ligne dans l'éditeur SQL Supabase :
+
+```sql
+insert into public.admins (email) values ('autre@exemple.com');
+```
 
 ### Anti-triche
 

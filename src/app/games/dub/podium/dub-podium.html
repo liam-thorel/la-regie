@@ -1,6 +1,22 @@
 <div class="podium-screen">
+  @if (!loading() && !error()) {
+    <div class="confetti-layer" aria-hidden="true">
+      @for (piece of confetti; track piece.id) {
+        <span
+          class="confetti"
+          [style.left.%]="piece.left"
+          [style.background]="piece.color"
+          [style.animation-delay.s]="piece.delay"
+          [style.animation-duration.s]="piece.duration"
+          [style.--drift.px]="piece.drift"
+          [style.--tilt.deg]="piece.tilt"
+        ></span>
+      }
+    </div>
+  }
+
   @if (loading()) {
-    <p>Dépouillement...</p>
+    <app-loading-overlay label="Dépouillement..." />
   } @else if (error()) {
     <p class="error">{{ error() }}</p>
   } @else {
@@ -64,10 +80,20 @@
       </ul>
     </section>
 
+    @if (rematchCode(); as code) {
+      <div class="rematch-banner">
+        <span>L'host relance une partie avec les mêmes vidéos.</span>
+        <a class="btn btn-primary" [routerLink]="['/rejoindre', code]">Rejoindre la revanche</a>
+      </div>
+    }
+
     <div class="podium-actions">
       <a class="btn btn-secondary" routerLink="/">Retour à l'accueil</a>
 
       @if (isHost) {
+        <button class="btn-primary rematch-btn" (click)="rematch()" [disabled]="rematching()">
+          {{ rematching() ? 'Création...' : 'Rejouer avec les mêmes vidéos' }}
+        </button>
         <button class="btn-secondary danger" (click)="closeGame()" [disabled]="closing()">
           {{ closing() ? 'Suppression...' : 'Fermer et supprimer la partie' }}
         </button>

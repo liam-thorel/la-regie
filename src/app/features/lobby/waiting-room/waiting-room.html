@@ -1,19 +1,24 @@
+<app-top-bar />
 <div class="center-screen">
   @if (loading()) {
-    <p>Chargement du lobby...</p>
+    <app-loading-overlay label="Chargement du lobby..." />
   } @else if (error() && !lobby()) {
     <p class="error">{{ error() }}</p>
   } @else if (lobby(); as l) {
     <div class="card card-wide">
       <div class="lobby-header">
+        <app-wheel-logo [size]="52" />
         @if (game(); as g) {
           <span class="game-eyebrow">{{ g.name }}</span>
         }
         <button class="ticket-code" (click)="copyCode()" title="Copier le code">
           {{ l.code }}
         </button>
+        <button class="link-btn copy-link-btn" (click)="copyLink()">
+          {{ linkCopied() ? 'Lien copié' : 'Copier le lien pour rejoindre en un clic' }}
+        </button>
         <p class="hint">
-          {{ codeCopied() ? 'Code copié' : 'Donne ce code à tes amis pour qu\'ils rejoignent.' }}
+          {{ codeCopied() ? 'Code copié' : 'Ou donne ce code à tes amis pour qu\'ils le saisissent.' }}
         </p>
       </div>
 

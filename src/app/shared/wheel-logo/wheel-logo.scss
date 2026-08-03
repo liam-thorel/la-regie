@@ -1,0 +1,22 @@
+:host {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.spin {
+  transform-origin: 50px 46px;
+  animation: wheel-turn var(--wheel-speed, 28s) linear infinite;
+}
+
+.wheel.still .spin {
+  animation: none;
+}
+
+@keyframes wheel-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,3 +1,21 @@
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.brand-name {
+  font-weight: 650;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 1.25rem;
+}
+
 .avatar-picker {
   display: flex;
   justify-content: center;
@@ -12,7 +30,7 @@
   width: 84px;
   height: 84px;
   border-radius: 50%;
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--border-strong);
   background: var(--surface-2);
   display: flex;
   align-items: center;
@@ -25,7 +43,7 @@
   letter-spacing: 0.1em;
 
   &:hover {
-    border-color: var(--gold);
+    border-color: var(--accent);
   }
 
   img {

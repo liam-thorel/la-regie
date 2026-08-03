@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -14,8 +15,11 @@ import { LobbyService } from '../../../core/services/lobby';
 import { AuthService } from '../../../core/services/auth';
 import { VideoLibraryService } from '../../../core/services/video-library';
 import { DubGameService, DubWithPlayer } from '../services/dub-game';
+import { AppVolumeService } from '../../../core/services/app-volume';
 import { Lobby, Player, VideoAsset } from '../../../core/models/types';
 import { Scoreboard } from '../../../shared/scoreboard/scoreboard';
+import { TopBar } from '../../../shared/top-bar/top-bar';
+import { LoadingOverlay } from '../../../shared/loading-overlay/loading-overlay';
 
 /**
  * Diffusion : les doublages passent un par un, en même temps chez tous les
@@ -24,7 +28,7 @@ import { Scoreboard } from '../../../shared/scoreboard/scoreboard';
  */
 @Component({
   selector: 'app-dub-playback',
-  imports: [Scoreboard],
+  imports: [LoadingOverlay, TopBar, Scoreboard],
   templateUrl: './dub-playback.html',
   styleUrl: './dub-playback.scss',
 })
@@ -35,6 +39,7 @@ export class DubPlayback implements OnInit, OnDestroy {
   private readonly videoLibrary = inject(VideoLibraryService);
   private readonly dubGame = inject(DubGameService);
   readonly auth = inject(AuthService);
+  readonly volumeService = inject(AppVolumeService);
 
   private readonly videoRef = viewChild<ElementRef<HTMLVideoElement>>('videoEl');
   private readonly audioRef = viewChild<ElementRef<HTMLAudioElement>>('audioEl');
@@ -58,6 +63,15 @@ export class DubPlayback implements OnInit, OnDestroy {
   readonly roundNumber = computed(() => this.lobby()?.current_round ?? 1);
   readonly currentDub = computed(() => this.dubs()[this.index()] ?? null);
   readonly isLast = computed(() => this.index() >= this.dubs().length - 1);
+
+  constructor() {
+    // Répercute un changement de volume en direct, même en pleine lecture.
+    effect(() => {
+      const volume = this.volumeService.volume();
+      const audio = this.audioRef()?.nativeElement;
+      if (audio) audio.volume = volume;
+    });
+  }
 
   get isHost(): boolean {
     const profile = this.auth.currentProfile();
@@ -88,6 +102,14 @@ export class DubPlayback implements OnInit, OnDestroy {
         this.dubGame.listDubs(this.lobbyId, lobby.current_round),
         this.dubGame.getPhase(this.lobbyId),
       ]);
+
+      // Reprise après rechargement : si la diffusion est déjà passée
+      // (vote en cours, voire partie terminée), on rejoint direct.
+      const screen = this.dubGame.resolveScreen(lobby, phase?.phase ?? null);
+      if (screen !== 'diffusion') {
+        this.router.navigate(['/jeu/doublage', this.lobbyId, screen]);
+        return;
+      }
 
       this.video.set(video);
       this.dubs.set(dubs);
@@ -152,6 +174,7 @@ export class DubPlayback implements OnInit, OnDestroy {
     this.playing.set(true);
     this.needsManualStart.set(false);
 
+    audio.volume = this.volumeService.volume();
     try {
       await Promise.all([video.play(), audio.play()]);
     } catch {

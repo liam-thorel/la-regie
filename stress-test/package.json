@@ -1,0 +1,12 @@
+{
+  "name": "olygames-stress-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "node run.mjs",
+    "cleanup": "node cleanup.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}

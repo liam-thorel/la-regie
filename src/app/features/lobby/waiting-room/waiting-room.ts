@@ -5,6 +5,9 @@ import { LobbyService } from '../../../core/services/lobby';
 import { AuthService } from '../../../core/services/auth';
 import { Lobby, Player } from '../../../core/models/types';
 import { GameDefinition, getGame } from '../../../core/models/game-registry';
+import { WheelLogo } from '../../../shared/wheel-logo/wheel-logo';
+import { TopBar } from '../../../shared/top-bar/top-bar';
+import { LoadingOverlay } from '../../../shared/loading-overlay/loading-overlay';
 
 /**
  * Salle d'attente commune à tous les jeux : code d'invitation, liste des
@@ -13,7 +16,7 @@ import { GameDefinition, getGame } from '../../../core/models/game-registry';
  */
 @Component({
   selector: 'app-waiting-room',
-  imports: [],
+  imports: [LoadingOverlay, TopBar, WheelLogo],
   templateUrl: './waiting-room.html',
   styleUrl: './waiting-room.scss',
 })
@@ -30,6 +33,7 @@ export class WaitingRoom implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly starting = signal(false);
   readonly codeCopied = signal(false);
+  readonly linkCopied = signal(false);
 
   private playersChannel: RealtimeChannel | null = null;
   private lobbyChannel: RealtimeChannel | null = null;
@@ -110,6 +114,17 @@ export class WaitingRoom implements OnInit, OnDestroy {
     await navigator.clipboard.writeText(code);
     this.codeCopied.set(true);
     setTimeout(() => this.codeCopied.set(false), 2000);
+  }
+
+  /** Lien direct qui rejoint la partie en un clic, sans ressaisir le code. */
+  async copyLink(): Promise<void> {
+    const code = this.lobby()?.code;
+    if (!code) return;
+
+    const url = `${location.origin}/rejoindre/${code}`;
+    await navigator.clipboard.writeText(url);
+    this.linkCopied.set(true);
+    setTimeout(() => this.linkCopied.set(false), 2000);
   }
 
   async startGame(): Promise<void> {

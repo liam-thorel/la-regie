@@ -1,10 +1,12 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from '../../../core/services/supabase';
 import { LobbyService } from '../../../core/services/lobby';
 import { AuthService } from '../../../core/services/auth';
 import { DubGameService } from '../services/dub-game';
-import { Lobby } from '../../../core/models/types';
+import { DubSettings, Lobby } from '../../../core/models/types';
+import { LoadingOverlay } from '../../../shared/loading-overlay/loading-overlay';
 
 /** Une ligne de la vue lobby_trophies : score et compteurs de votes. */
 interface TrophyRow {
@@ -27,11 +29,11 @@ interface Trophy {
 
 @Component({
   selector: 'app-dub-podium',
-  imports: [RouterLink],
+  imports: [LoadingOverlay, RouterLink],
   templateUrl: './dub-podium.html',
   styleUrl: './dub-podium.scss',
 })
-export class DubPodium implements OnInit {
+export class DubPodium implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly supabase = inject(SupabaseService).client;
   private readonly lobbyService = inject(LobbyService);
@@ -44,6 +46,24 @@ export class DubPodium implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly closing = signal(false);
+  readonly rematching = signal(false);
+  /** Code annoncé par l'host quand il relance une partie, pour que les
+   *  autres joueurs encore sur cet écran puissent rejoindre en un clic. */
+  readonly rematchCode = signal<string | null>(null);
+
+  private rematchChannel: RealtimeChannel | null = null;
+  private lobbyId = '';
+
+  /** Confettis du podium : position, couleur, délai et durée tirés au sort. */
+  readonly confetti = Array.from({ length: 36 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    color: `var(${['--c-red', '--c-gold', '--c-teal', '--c-green', '--c-blurple', '--c-pink'][i % 6]})`,
+    delay: Math.random() * 0.8,
+    duration: 2.8 + Math.random() * 1.6,
+    drift: Math.random() * 50 - 25,
+    tilt: Math.random() * 360,
+  }));
 
   get isHost(): boolean {
     const profile = this.auth.currentProfile();
@@ -99,12 +119,12 @@ export class DubPodium implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    const lobbyId = this.route.snapshot.paramMap.get('lobbyId') ?? '';
+    this.lobbyId = this.route.snapshot.paramMap.get('lobbyId') ?? '';
 
     try {
       const [lobby, { data, error }] = await Promise.all([
-        this.lobbyService.getLobby(lobbyId),
-        this.supabase.from('lobby_trophies').select('*').eq('lobby_id', lobbyId),
+        this.lobbyService.getLobby(this.lobbyId),
+        this.supabase.from('lobby_trophies').select('*').eq('lobby_id', this.lobbyId),
       ]);
 
       if (error) throw error;
@@ -115,6 +135,54 @@ export class DubPodium implements OnInit {
     } finally {
       this.loading.set(false);
     }
+
+    // Si l'host relance une partie pendant qu'on est encore sur cet écran,
+    // on reçoit directement le code plutôt que d'attendre qu'on nous le
+    // dise à l'oral.
+    this.rematchChannel = this.dubGame.rematchChannel(this.lobbyId, (code) => {
+      this.rematchCode.set(code);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.rematchChannel?.unsubscribe();
+  }
+
+  /**
+   * Réservé à l'host : crée une nouvelle partie avec les mêmes vidéos et
+   * le même nombre de manches, puis prévient les autres joueurs encore
+   * présents pour qu'ils puissent la rejoindre en un clic.
+   */
+  async rematch(): Promise<void> {
+    const lobby = this.lobby();
+    if (!this.isHost || !lobby) return;
+
+    this.error.set(null);
+    this.rematching.set(true);
+
+    const settings = lobby.settings as unknown as DubSettings;
+    const { lobby: newLobby, error } = await this.lobbyService.createLobby(
+      'doublage',
+      lobby.rounds_count,
+      lobby.settings,
+    );
+
+    if (error || !newLobby) {
+      this.rematching.set(false);
+      this.error.set('Impossible de relancer une partie.');
+      return;
+    }
+
+    if (settings?.videoIds?.length) {
+      await this.dubGame.setupRounds(newLobby.id, settings.videoIds);
+    }
+
+    if (this.rematchChannel) {
+      await this.dubGame.announceRematch(this.rematchChannel, newLobby.code);
+    }
+
+    this.rematching.set(false);
+    this.router.navigate(['/lobby', newLobby.id]);
   }
 
   /**

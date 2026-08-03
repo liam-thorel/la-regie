@@ -1,0 +1,125 @@
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 18px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  opacity: 0.9;
+  transition: opacity 0.13s var(--ease);
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.menu-wrap {
+  position: relative;
+}
+
+.burger-btn {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  span {
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--text-muted);
+  }
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+}
+
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 31;
+  width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 6px;
+  animation: menu-in 0.12s var(--ease);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.menu-item {
+  display: block;
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+.menu-divider {
+  height: 1px;
+  margin: 5px 4px;
+  background: var(--border);
+}
+
+.menu-volume {
+  padding: 7px 10px 9px;
+}
+
+.menu-volume-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.menu-volume-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.menu-volume input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}

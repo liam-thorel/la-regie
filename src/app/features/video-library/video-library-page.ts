@@ -3,6 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { VideoLibraryService } from '../../core/services/video-library';
 import { VideoAsset } from '../../core/models/types';
+import { TopBar } from '../../shared/top-bar/top-bar';
+import { LoadingOverlay } from '../../shared/loading-overlay/loading-overlay';
+
+/** Au-delà, avertissement avant l'envoi plutôt qu'un blocage silencieux. */
+const MAX_RECOMMENDED_DURATION_SECONDS = 180;
+const MAX_RECOMMENDED_SIZE_MB = 200;
 
 /**
  * Gestion de la bibliothèque de vidéos.
@@ -12,7 +18,7 @@ import { VideoAsset } from '../../core/models/types';
  */
 @Component({
   selector: 'app-video-library-page',
-  imports: [FormsModule, RouterLink],
+  imports: [LoadingOverlay, TopBar, FormsModule, RouterLink],
   templateUrl: './video-library-page.html',
   styleUrl: './video-library-page.scss',
 })
@@ -28,6 +34,10 @@ export class VideoLibraryPage implements OnInit {
 
   private file: File | null = null;
   readonly fileName = signal<string | null>(null);
+
+  readonly editingId = signal<string | null>(null);
+  readonly editingTitle = signal('');
+  readonly generatingId = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
     await this.refresh();
@@ -60,6 +70,27 @@ export class VideoLibraryPage implements OnInit {
       return;
     }
 
+    // Une prise démarre avec la vidéo et se termine avec elle : une vidéo
+    // trop longue transforme une manche en marathon d'enregistrement.
+    // Avertissement plutôt que blocage strict, l'host reste juge.
+    const duration = await this.library.readDuration(this.file).catch(() => null);
+    const sizeMB = this.file.size / (1024 * 1024);
+
+    if (duration && duration > MAX_RECOMMENDED_DURATION_SECONDS) {
+      const minutes = Math.round(duration / 60);
+      const proceed = confirm(
+        `Cette vidéo dure ${minutes} min. Une prise dure aussi longtemps qu'elle : ` +
+          `au-delà de quelques minutes, la manche devient difficile à jouer. Continuer quand même ?`,
+      );
+      if (!proceed) return;
+    } else if (sizeMB > MAX_RECOMMENDED_SIZE_MB) {
+      const proceed = confirm(
+        `Ce fichier fait ${sizeMB.toFixed(0)} Mo. C'est volumineux : l'envoi prendra du temps ` +
+          `et ça mangera une bonne partie de l'espace R2 gratuit. Continuer quand même ?`,
+      );
+      if (!proceed) return;
+    }
+
     this.error.set(null);
     this.uploading.set(true);
     this.progress.set(0);
@@ -78,6 +109,51 @@ export class VideoLibraryPage implements OnInit {
     this.file = null;
     this.fileName.set(null);
     this.title.set('');
+    await this.refresh();
+  }
+
+  thumbnailUrl(key: string | null): string | null {
+    return this.library.thumbnailUrl(key);
+  }
+
+  startRename(video: VideoAsset): void {
+    this.error.set(null);
+    this.editingId.set(video.id);
+    this.editingTitle.set(video.title);
+  }
+
+  cancelRename(): void {
+    this.editingId.set(null);
+  }
+
+  async saveRename(video: VideoAsset): Promise<void> {
+    const title = this.editingTitle().trim();
+    if (!title) {
+      this.error.set('Le titre ne peut pas être vide.');
+      return;
+    }
+
+    const { error } = await this.library.renameVideo(video.id, title);
+    if (error) {
+      this.error.set(error);
+      return;
+    }
+
+    this.editingId.set(null);
+    await this.refresh();
+  }
+
+  async generateThumbnail(video: VideoAsset): Promise<void> {
+    this.error.set(null);
+    this.generatingId.set(video.id);
+
+    const { error } = await this.library.backfillThumbnail(video);
+    this.generatingId.set(null);
+
+    if (error) {
+      this.error.set(error);
+      return;
+    }
     await this.refresh();
   }
 
